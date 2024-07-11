@@ -5,6 +5,62 @@ import base64
 import json
 import os
 import sqlite3
+import datetime
+
+async def DB_connect():
+    DATABASE_PATH = 'T9.db'
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.commit()
+    return conn
+
+async def Message_handler (conn , message):
+    if message['OpCode'] == 'RoundResult':
+        table_id = message['TableId']
+        banker_points = message['BankerPoints']
+        player_points = message['PlayerPoints']
+        banker_cards = json.dumps(message['BankerCard'])
+        player_cards = json.dumps(message['PlayerCard'])
+        win_area = message['WinArea']
+        game_date = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        Player_Win = 0
+        Banker_Win = 0
+        Tie_Game = 0
+        Any_Pair = 0
+        Perfect_Pair = 0
+        Lucky_Six = 0
+        Player_Pair = 0
+        Banker_Pair = 0
+        for Winner in win_area :
+            if Winner == 0 :
+                Banker_Win = 1
+            elif Winner == 1 :
+                Player_Win = 1 
+            elif Winner == 2 :
+                Tie_Game = 1
+            elif Winner == 4 :
+                Player_Pair = 1 
+            elif Winner == 9 :
+                Any_Pair = 1 
+            elif Winner == 3 :
+                Banker_Pair = 1
+            elif Winner == 6 or Winner == 26:
+                Lucky_Six = 1
+            elif Winner == 10 :
+                Perfect_Pair = 1 
+        cursor = conn.cursor()
+        cursor.execute('''
+                INSERT INTO Game_Result (table_id, game_date, Banker_Points, Player_Points, Banker_Card, Player_Card, Player_Win,Banker_Win,Tie_Game,Any_Pair,Perfect_Pair,Lucky_Six,Player_Pair,Banker_Pair)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
+        conn.commit()
+    elif message['OpCode'] == 'Shuffle' :
+        Event_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        cursor = conn.cursor()
+        cursor.execute('''
+                INSERT INTO Event (Event_type , Table_id , Event_time)
+                VALUES (?, ?, ?)
+            ''', (message['OpCode'] , message['TableId']), Event_time)
+        conn.commit()
 
 async def LoginGetToken():
     url = 'https://g.t9cn818.online/api/Lobby/login'
@@ -43,6 +99,7 @@ async def connect():
     while True:  # Outer loop for reconnecting
         try:
             login_data = await LoginGetToken()
+            conn = await DB_connect()
             websocketURL = login_data['Data']['ConnectIds'][0]
             url = f'wss://g.t9cn818.online/api/baccarat{websocketURL}'
             print(url)
@@ -80,16 +137,15 @@ async def connect():
                             elif message_data['OpCode'] == 'LoginGame':
                                 print("Enter Table Message")
                                 await EnterTable(websocket=websocket, login_data=login_data)
-                            elif message_data['OpCode'] == 'RoundResult':
+                            elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'StartGame' or message_data['OpCode'] == 'Shuffle':
+                                await Message_handler(conn=conn , message=message_data)
                                 print(message_data)
-                            elif message_data['OpCode'] == 'StartGame':
-                                print(message_data)
-                            elif message_data['OpCode'] == 'Shuffle':
-                                print(message_data)
+
                         except :
                             print("Receive message error")
 
         except websockets.ConnectionClosed:
+            conn.close()
             print("WebSocket connection closed, retrying immediately...")
 
         except Exception as e:
