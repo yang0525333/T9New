@@ -15,7 +15,7 @@ async def DB_connect():
 
 async def Message_handler (conn , message):
     if message['OpCode'] == 'RoundResult':
-        table_id = message['TableId']
+        Table_id = message['TableId']
         banker_points = message['BankerPoints']
         player_points = message['PlayerPoints']
         banker_cards = json.dumps(message['BankerCard'])
@@ -49,9 +49,9 @@ async def Message_handler (conn , message):
                 Perfect_Pair = 1 
         cursor = conn.cursor()
         cursor.execute('''
-                INSERT INTO Game_Result (table_id, game_date, Banker_Points, Player_Points, Banker_Card, Player_Card, Player_Win,Banker_Win,Tie_Game,Any_Pair,Perfect_Pair,Lucky_Six,Player_Pair,Banker_Pair)
+                INSERT INTO Game_Result (Table_id, game_date, Banker_Points, Player_Points, Banker_Card, Player_Card, Player_Win,Banker_Win,Tie_Game,Any_Pair,Perfect_Pair,Lucky_Six,Player_Pair,Banker_Pair)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
+            ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
         conn.commit()
     elif message['OpCode'] == 'Shuffle' :
         Event_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
