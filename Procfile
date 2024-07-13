@@ -1,1 +1,1 @@
-web: python T9.py
+worker: python T9.py
