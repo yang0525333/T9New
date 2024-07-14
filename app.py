@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-import psycopg2
+import psycopg2 ,os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -93,4 +93,4 @@ def search_data():
     return render_template('search_data.html', show_results=False)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
