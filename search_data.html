@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: left;
+        }
+        form {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        form label {
+            margin-right: 10px;
+        }
+        form input[type="datetime-local"],
+        form input[type="submit"],
+        form input[type="button"],
+        form select {
+            margin-right: 10px;
+            font-size: 14px;
+            padding: 6px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>選取時間</h1>
+    <form action="/" method="post">
+        <label for="start_time">開始時間:</label>
+        <input type="datetime-local" id="start_time" name="start_time" required>
+        
+        <label for="end_time">結束時間:</label>
+        <input type="datetime-local" id="end_time" name="end_time" required>
+        
+        <input type="submit" value="開始搜尋">
+    </form>
+
+    <form action="/" method="post">
+        <label>近 <input type="number" id="time_amount" name="time_amount" min="1" max="30" style="width: 50px; height: 25px;" placeholder="數量"> </label>
+        <select id="time_unit" name="time_unit">
+            <option value="hour">小時</option>
+            <option value="day">日</option>
+        </select>
+        <input type="submit" name="quick_search" value="快速搜尋">
+    </form>
+
+    {% if show_results and data %}
+    <h2>搜尋結果</h2>
+    {% if start_time and end_time %}
+    <p>搜尋時間範圍：{{ start_time }} 至 {{ end_time }}</p>
+    {% endif %}
+    <table>
+        <tr>
+            <th style="width: 10%;">桌號</th>
+            <th style="width: 10%;">閒贏</th>
+            <th style="width: 10%;">莊贏</th>
+            <th style="width: 10%;">和局</th>
+            <th style="width: 10%;">任意對子</th>
+            <th style="width: 10%;">完美對子</th>
+            <th style="width: 10%;">幸運六</th>
+            <th style="width: 10%;">閒家對子</th>
+            <th style="width: 10%;">莊家對子</th>
+        </tr>
+        {% for row in data %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td>{{ row[3] }}</td>
+            <td>{{ row[4] }}</td>
+            <td>{{ row[5] }}</td>
+            <td>{{ row[6] }}</td>
+            <td>{{ row[7] }}</td>
+            <td>{{ row[8] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</body>
+</html>
