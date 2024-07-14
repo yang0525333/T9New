@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request
-import psycopg2 ,os
+import psycopg2
+import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
@@ -10,8 +11,6 @@ DB_USER = "u75p3bjmps553l"
 DB_PASSWORD = "p9a01ca7070c719e093cf202a51ac3bace95a2869fb77852052b8958e57b7ac16"
 DB_HOST = "ccba8a0vn4fb2p.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com"
 DB_PORT = "5432"
-
-from datetime import datetime, timedelta
 
 def calculate_time_range(time_amount, time_unit):
     if time_unit == 'hour':
@@ -28,7 +27,6 @@ def calculate_time_range(time_amount, time_unit):
     end_time_str = end_time.strftime('%Y-%m-%d %H:%M:%S')
 
     return start_time_str, end_time_str
-
 
 @app.route('/', methods=['GET', 'POST'])
 def search_data():
@@ -48,8 +46,6 @@ def search_data():
             end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
 
         try:
-            print(f"start_time : {start_time}")
-            print(f"end_time : {end_time}")
             conn = psycopg2.connect(
                 dbname=DB_NAME,
                 user=DB_USER,
