@@ -23,8 +23,8 @@ def calculate_time_range(time_amount, time_unit):
         raise ValueError("Invalid time unit")
 
     # Format datetime objects as strings
-    start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
-    end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
+    start_time_str = start_time.strftime('%Y-%m-%d %H:%M:%S')
+    end_time_str = end_time.strftime('%Y-%m-%d %H:%M:%S')
 
     return start_time_str, end_time_str
 
