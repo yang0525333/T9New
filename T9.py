@@ -85,7 +85,7 @@ async def LoginGetToken():
     data = {
         "Language": "TW",
         "Account": "386p2",
-        "Password": "aaa888",
+        "Password": "aaa999",
         "SerialNumber": "M1GJk9c4Cf",
         "Merchant": "_T9",
         "Device": "2"
