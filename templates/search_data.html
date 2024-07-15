@@ -67,6 +67,16 @@
     <p>搜尋時間範圍：{{ start_time }} 至 {{ end_time }}</p>
     {% endif %}
     {% if data %}
+    {% set row1_total = 0 %}
+    {% set row2_total = 0 %}
+    
+    {% for row in data %}
+        {% set row1_total = row1_total + row[1] %}
+        {% set row2_total = row2_total + row[2] %}
+    {% endfor %}
+    
+    {% set total = row1_total + row2_total %}
+    
     <table>
         <tr>
             <th style="width: 10%;">桌號</th>
@@ -82,8 +92,8 @@
         {% for row in data %}
         <tr>
             <td>{{ row[0] }}</td>
-            <td>{{ row[1] }}</td>
-            <td>{{ row[2] }}</td>
+            <td>{{ row[1] }} ({{ "%.2f" % ((row[1] / total) * 100) }}%)</td>
+            <td>{{ row[2] }} ({{ "%.2f" % ((row[2] / total) * 100) }}%)</td>
             <td>{{ row[3] }}</td>
             <td>{{ row[4] }}</td>
             <td>{{ row[5] }}</td>
