@@ -22,11 +22,7 @@ def calculate_time_range(time_amount, time_unit):
     else:
         raise ValueError("Invalid time unit")
 
-    # Format datetime objects as strings
-    start_time_str = start_time.strftime('%Y-%m-%d %H:%M:%S')
-    end_time_str = end_time.strftime('%Y-%m-%d %H:%M:%S')
-
-    return start_time_str, end_time_str
+    return start_time, end_time
 
 @app.route('/', methods=['GET', 'POST'])
 def search_data():
@@ -45,8 +41,23 @@ def search_data():
         else:
             start_time = request.form['start_time']
             end_time = request.form['end_time']
-            start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
-            end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+            if isinstance(start_time, str):
+                try:
+                    start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+                except ValueError:
+                    start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+                start_time -= timedelta(hours=8) 
+
+            if isinstance(end_time, str):
+                try:
+                    end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S')
+                except ValueError:
+                    end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+                end_time -= timedelta(hours=8) 
+
+
+        print(start_time)
+        print(end_time)
 
         try:
             conn = psycopg2.connect(
@@ -82,11 +93,10 @@ def search_data():
             print(data)
 
             # Add 8 hours to start_time and end_time
-            start_time = (datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
-            end_time = (datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
-
+            start_time = (start_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+            end_time = (end_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+            
             return render_template('search_data.html', data=data, show_results=True, start_time=start_time, end_time=end_time, time_amount=time_amount, time_unit=time_unit)
-
 
         except psycopg2.Error as e:
             print(f"Error connecting to PostgreSQL: {e}")
@@ -98,4 +108,4 @@ def search_data():
     return render_template('search_data.html', show_results=False)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8888)))
