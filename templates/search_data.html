@@ -92,8 +92,8 @@
         {% for row in data %}
         <tr>
             <td>{{ row[0] }}</td>
-            <td>{{ row[1] }} ({{ "%.2f" % ((row[1] / total) * 100) }}%)</td>
-            <td>{{ row[2] }} ({{ "%.2f" % ((row[2] / total) * 100) }}%)</td>
+            <td>{{ row[1] }}{% if total > 0 %} ({{ "%.2f" % ((row[1] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
+            <td>{{ row[2] }}{% if total > 0 %} ({{ "%.2f" % ((row[2] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
             <td>{{ row[3] }}</td>
             <td>{{ row[4] }}</td>
             <td>{{ row[5] }}</td>
