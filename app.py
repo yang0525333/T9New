@@ -30,6 +30,9 @@ def calculate_time_range(time_amount, time_unit):
 
 @app.route('/', methods=['GET', 'POST'])
 def search_data():
+    time_amount = None
+    time_unit = None
+
     if request.method == 'POST':
         if 'quick_search' in request.form:
             if 'time_amount' in request.form and 'time_unit' in request.form:
@@ -78,8 +81,8 @@ def search_data():
             conn.close()
 
             # Add 8 hours to start_time and end_time
-            start_time += timedelta(hours=8)
-            end_time += timedelta(hours=8)
+            start_time = (datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+            end_time = (datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
 
             return render_template('search_data.html', data=data, show_results=True, start_time=start_time, end_time=end_time, time_amount=time_amount, time_unit=time_unit)
 
