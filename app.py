@@ -80,23 +80,7 @@ def search_data():
             data = cursor.fetchall()
             conn.close()
             print(data)
-            modified_data = []
 
-            for item in data:
-                total = item[1] + item[2]
-                Player_percent = (item[1] / total) * 100
-                Banker_percent = (item[2] / total) * 100
-                
-                modified_item = (
-                    item[0],
-                    f"{item[1]} ({Player_percent:.2f}%)",
-                    f"{item[2]} ({Banker_percent:.2f}%)",
-                    *item[3:]
-                )
-                
-                modified_data.append(modified_item)
-            data = modified_data
-            print(data)
             # Add 8 hours to start_time and end_time
             start_time = (datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
             end_time = (datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
