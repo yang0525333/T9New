@@ -44,28 +44,29 @@
     <h1>選取時間</h1>
     <form action="/" method="post">
         <label for="start_time">開始時間:</label>
-        <input type="datetime-local" id="start_time" name="start_time" required>
+        <input type="datetime-local" id="start_time" name="start_time" value="{{ start_time }}" required>
         
         <label for="end_time">結束時間:</label>
-        <input type="datetime-local" id="end_time" name="end_time" required>
+        <input type="datetime-local" id="end_time" name="end_time" value="{{ end_time }}" required>
         
         <input type="submit" value="開始搜尋">
     </form>
 
     <form action="/" method="post">
-        <label>近 <input type="number" id="time_amount" name="time_amount" min="1" max="30" style="width: 50px; height: 25px;" placeholder="數量"> </label>
+        <label>近 <input type="number" id="time_amount" name="time_amount" min="1" max="30" style="width: 50px; height: 25px;" placeholder="數量" value="{{ time_amount }}"> </label>
         <select id="time_unit" name="time_unit">
-            <option value="hour">小時</option>
-            <option value="day">日</option>
+            <option value="hour" {% if time_unit == "hour" %}selected{% endif %}>小時</option>
+            <option value="day" {% if time_unit == "day" %}selected{% endif %}>日</option>
         </select>
         <input type="submit" name="quick_search" value="快速搜尋">
     </form>
 
-    {% if show_results and data %}
+    {% if show_results %}
     <h2>搜尋結果</h2>
     {% if start_time and end_time %}
     <p>搜尋時間範圍：{{ start_time }} 至 {{ end_time }}</p>
     {% endif %}
+    {% if data %}
     <table>
         <tr>
             <th style="width: 10%;">桌號</th>
@@ -92,6 +93,9 @@
         </tr>
         {% endfor %}
     </table>
+    {% else %}
+    <p>查無資料</p>
+    {% endif %}
     {% endif %}
 </body>
 </html>

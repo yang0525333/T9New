@@ -77,7 +77,7 @@ def search_data():
             data = cursor.fetchall()
             conn.close()
 
-            return render_template('search_data.html', data=data, show_results=True, start_time=start_time, end_time=end_time)
+            return render_template('search_data.html', data=data, show_results=True, start_time=start_time, end_time=end_time,time_amount=time_amount, time_unit=time_unit)
 
         except psycopg2.Error as e:
             print(f"Error connecting to PostgreSQL: {e}")
@@ -89,4 +89,4 @@ def search_data():
     return render_template('search_data.html', show_results=False)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5432)))
