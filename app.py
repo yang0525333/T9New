@@ -76,9 +76,13 @@ def search_data():
 
             data = cursor.fetchall()
             conn.close()
-            
 
-            return render_template('search_data.html', data=data, show_results=True, start_time=start_time, end_time=end_time,time_amount=time_amount, time_unit=time_unit)
+            # Add 8 hours to start_time and end_time
+            start_time += timedelta(hours=8)
+            end_time += timedelta(hours=8)
+
+            return render_template('search_data.html', data=data, show_results=True, start_time=start_time, end_time=end_time, time_amount=time_amount, time_unit=time_unit)
+
 
         except psycopg2.Error as e:
             print(f"Error connecting to PostgreSQL: {e}")
