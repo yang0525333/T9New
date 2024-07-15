@@ -79,6 +79,7 @@ def search_data():
 
             data = cursor.fetchall()
             conn.close()
+            print(data)
 
             # Add 8 hours to start_time and end_time
             start_time = (datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
