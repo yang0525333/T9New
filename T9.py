@@ -126,10 +126,10 @@ async def connect():
                     auth_data = {
                         "OpCode": "LoginGame",
                         "Data": {
-                            "AgentId": "17619",
-                            "MemberName": "km831yt",
+                            "AgentId": "19414",
+                            "MemberName": "386p2",
                             "AccountType": "1",
-                            "Password": "ken456xyz1",
+                            "Password": "aaa999",
                             "GameType": "80001",
                             "GetBroadCast": "1"
                         },
