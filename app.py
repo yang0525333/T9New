@@ -96,6 +96,7 @@ def search_data():
                 
                 modified_data.append(modified_item)
             data = modified_data
+            print(data)
             # Add 8 hours to start_time and end_time
             start_time = (datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
             end_time = (datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S') + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
