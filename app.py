@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, requestpip
 import psycopg2
 import os
 from datetime import datetime, timedelta
@@ -77,7 +77,27 @@ def search_data():
             data = cursor.fetchall()
             conn.close()
 
-            return render_template('search_data.html', data=data, show_results=True, start_time=start_time, end_time=end_time,time_amount=time_amount, time_unit=time_unit)
+            # 計算總局數和比重
+            total_player_win = sum(row[1] for row in data)
+            total_banker_win = sum(row[2] for row in data)
+            total = total_player_win + total_banker_win
+
+            # 添加百分比數據
+            data_with_percentage = []
+            for row in data:
+                player_win_percentage = (row[1] / total * 100) if total > 0 else 0
+                banker_win_percentage = (row[2] / total * 100) if total > 0 else 0
+                data_with_percentage.append((
+                    row[0], 
+                    f"{row[1]} ({player_win_percentage:.2f}%)", 
+                    f"{row[2]} ({banker_win_percentage:.2f}%)",
+                    row[3], row[4], row[5], row[6], row[7], row[8]
+                ))
+
+            start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S')
+            end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M:%S')
+
+            return render_template('search_data.html', data=data_with_percentage, show_results=True, start_time=start_time, end_time=end_time, time_amount=time_amount, time_unit=time_unit)
 
         except psycopg2.Error as e:
             print(f"Error connecting to PostgreSQL: {e}")
