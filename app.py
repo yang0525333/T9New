@@ -23,8 +23,8 @@ def calculate_time_range(time_amount, time_unit):
         raise ValueError("Invalid time unit")
 
     # Format datetime objects as strings
-    start_time_str = start_time.strftime('%Y-%m-%d %H:%M:%S')
-    end_time_str = end_time.strftime('%Y-%m-%d %H:%M:%S')
+    start_time_str = start_time.strftime('%Y-%m-%dT%H:%M:%S')
+    end_time_str = end_time.strftime('%Y-%m-%dT%H:%M:%S')
 
     return start_time_str, end_time_str
 
@@ -94,4 +94,4 @@ def search_data():
     return render_template('search_data.html', show_results=False)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5432)))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
