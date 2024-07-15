@@ -42,8 +42,8 @@ def search_data():
         else:
             start_time = request.form['start_time']
             end_time = request.form['end_time']
-            start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M')
-            end_time = datetime.strptime(end_time, '%Y-%m-%d %H:%M')
+            start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+            end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
 
         try:
             conn = psycopg2.connect(
