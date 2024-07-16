@@ -68,6 +68,7 @@ async def Message_handler(conn):
             ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
             conn.commit()
             print(f"RoundResult Table : {Table_id}")
+            
         elif message['OpCode'] == 'Shuffle':
             Event_time = datetime.datetime.now()
             cursor = conn.cursor()
@@ -133,6 +134,7 @@ async def periodic_sync(websocket, login_data, interval=5):
             print(f'Synctime Exception error: {e}')
 
 async def connect():
+    global conn  # 声明使用全局变量conn
     while True:
         try:
             login_data = await LoginGetToken()
@@ -198,11 +200,12 @@ async def receive_messages(websocket, login_data, conn):
             print(f"Receive message error {message}")
 
 async def main():
-    conn = await DB_connect()
-    await asyncio.gather(
-        connect(),
-        Message_handler(conn)
-    )
+    global conn  # 声明使用全局变量conn
+    async with conn:  # 使用async with确保在使用完后自动关闭连接
+        await asyncio.gather(
+            connect(),
+            Message_handler(conn)
+        )
 
 async def restart_worker_after(interval):
     while True:
@@ -210,5 +213,9 @@ async def restart_worker_after(interval):
         print("Restarting worker...")
         asyncio.create_task(main())
 
+async def start():
+    await main()
+    asyncio.create_task(restart_worker_after(interval=3600))
+
 if __name__ == "__main__":
-    asyncio.run(restart_worker_after(interval=10))  
+    asyncio.run(start())
