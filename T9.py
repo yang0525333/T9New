@@ -113,8 +113,26 @@ async def EnterTable(websocket, login_data):
     print(EnterTable_data)
     await websocket.send(json.dumps(EnterTable_data))
 
+async def Synctime(websocket, login_data):
+    SynctimeBody = {
+        "OpCode": "SyncTime",
+        "Data": {
+            "GameType": "80001"
+        },
+        "Token": login_data['Data']['Token']
+    }
+    print("Synctime")
+    await websocket.send(json.dumps(SynctimeBody))
+
+async def periodic_sync(websocket, login_data, interval=5):
+    while True:
+        try :
+            await asyncio.sleep(interval)
+            await Synctime(websocket, login_data)
+        except Exception as e :
+            print(f'Synctime Unexceotion error {e}')
+
 async def connect():
-    retry_attempts = 0
     while True: 
         try:
             login_data = await LoginGetToken()
@@ -146,40 +164,41 @@ async def connect():
                     await websocket.send(json.dumps(auth_data))
                     print(auth_data)
 
-                    while True:  
-                        message = await websocket.recv()
-                        try:
-                            message_data = json.loads(message)
-                            if message_data['OpCode'] == 'DisConnected':
-                                print("WebSocket disconnected.")
-                                break 
-
-                            elif message_data['OpCode'] == 'LoginGame':
-                                print("Enter Table Message")
-                                await EnterTable(websocket=websocket, login_data=login_data)
-                            elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'Shuffle':
-                                await message_queue.put(message_data)
-                        except json.JSONDecodeError as e:
-                            print(f"JSON decode error: {e}")
-                        except KeyError as e:
-                            print(f"KeyError: {e}. Message: {message}")
-                        except Exception as e:
-                            print(f"Unexpected error: {e}")
-                        except:
-                            print(f"Receive message error {message}")
+                    await asyncio.gather(
+                        periodic_sync(websocket, login_data),  # Start periodic sync
+                        receive_messages(websocket, login_data, conn)
+                    )
 
         except websockets.ConnectionClosed:
             conn.close()
             print("WebSocket connection closed.")
 
         except Exception as e:
-            retry_attempts += 1
             print(f"Error: {str(e)}")
-            print(f"Retrying in 5 minutes... (Attempt {retry_attempts})")
-            await asyncio.sleep(300)  
 
-        finally:
-            await asyncio.sleep(1)
+
+async def receive_messages(websocket, login_data, conn):
+    while True:
+        message = await websocket.recv()
+        try:
+            message_data = json.loads(message)
+            if message_data['OpCode'] == 'DisConnected':
+                print("WebSocket disconnected.")
+                break 
+
+            elif message_data['OpCode'] == 'LoginGame':
+                print("Enter Table Message")
+                await EnterTable(websocket=websocket, login_data=login_data)
+            elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'Shuffle':
+                await message_queue.put(message_data)
+        except json.JSONDecodeError as e:
+            print(f"JSON decode error: {e}")
+        except KeyError as e:
+            print(f"KeyError: {e}. Message: {message}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+        except:
+            print(f"Receive message error {message}")
 
 async def main():
     conn = await DB_connect()
