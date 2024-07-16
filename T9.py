@@ -7,6 +7,7 @@ import psycopg2
 from psycopg2 import Error
 
 message_queue = asyncio.Queue()
+conn = None
 
 async def DB_connect():
     try:
