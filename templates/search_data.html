@@ -84,7 +84,7 @@
         {% set row1_total = 0 %}
         {% set row2_total = 0 %}
         {% set row3_total = 0 %}
-        {% for row in data %}
+        {% for row in data | sort(attribute='0') %}
             {% set row1_total = row1_total + row[1] %}
             {% set row2_total = row2_total + row[2] %}
             {% set row3_total = row3_total + row[3] %}
