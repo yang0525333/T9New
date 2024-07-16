@@ -104,12 +104,13 @@ async def EnterTable(websocket, login_data):
         "OpCode": "EnterTable",
         "Data": {
             "GameType": "80001",
-            "TableId": f"{LoginTable}",
+            "TableId": LoginTable,
             "EnterTableInLobby": "true"
         },
         "Token": login_data['Data']['Token']
     }
     await websocket.send(json.dumps(EnterTable_data))
+    print(EnterTable_data)
 
 async def connect():
     retry_attempts = 0
