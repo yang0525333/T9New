@@ -121,19 +121,18 @@ async def Synctime(websocket, login_data):
         },
         "Token": login_data['Data']['Token']
     }
-    print("Synctime")
     await websocket.send(json.dumps(SynctimeBody))
 
 async def periodic_sync(websocket, login_data, interval=5):
     while True:
-        try :
+        try:
             await asyncio.sleep(interval)
             await Synctime(websocket, login_data)
-        except Exception as e :
-            print(f'Synctime Unexceotion error {e}')
+        except Exception as e:
+            print(f'Synctime Exception error: {e}')
 
 async def connect():
-    while True: 
+    while True:
         try:
             login_data = await LoginGetToken()
             conn = await DB_connect()
@@ -147,27 +146,25 @@ async def connect():
             }
 
             async with websockets.connect(url, extra_headers=headers) as websocket:
-                retry_attempts = 0 
-                if websocket:
-                    auth_data = {
-                        "OpCode": "LoginGame",
-                        "Data": {
-                            "AgentId": "19414",
-                            "MemberName": "386p2",
-                            "AccountType": "1",
-                            "Password": "aaa999",
-                            "GameType": "80001",
-                            "GetBroadCast": "1"
-                        },
-                        "Token": login_data['Data']['Token']
-                    }
-                    await websocket.send(json.dumps(auth_data))
-                    print(auth_data)
+                auth_data = {
+                    "OpCode": "LoginGame",
+                    "Data": {
+                        "AgentId": "19414",
+                        "MemberName": "386p2",
+                        "AccountType": "1",
+                        "Password": "aaa999",
+                        "GameType": "80001",
+                        "GetBroadCast": "1"
+                    },
+                    "Token": login_data['Data']['Token']
+                }
+                await websocket.send(json.dumps(auth_data))
+                print(auth_data)
 
-                    await asyncio.gather(
-                        periodic_sync(websocket, login_data),  # Start periodic sync
-                        receive_messages(websocket, login_data, conn)
-                    )
+                await asyncio.gather(
+                    periodic_sync(websocket, login_data),  # Start periodic sync
+                    receive_messages(websocket, login_data, conn)
+                )
 
         except websockets.ConnectionClosed:
             conn.close()
@@ -176,6 +173,7 @@ async def connect():
         except Exception as e:
             print(f"Error: {str(e)}")
 
+        await asyncio.sleep(30)  
 
 async def receive_messages(websocket, login_data, conn):
     while True:
