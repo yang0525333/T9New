@@ -109,8 +109,8 @@ async def EnterTable(websocket, login_data):
         },
         "Token": login_data['Data']['Token']
     }
-    await websocket.send(json.dumps(EnterTable_data))
     print(EnterTable_data)
+    await websocket.send(json.dumps(EnterTable_data))
 
 async def connect():
     retry_attempts = 0
