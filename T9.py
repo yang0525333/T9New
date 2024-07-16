@@ -99,7 +99,7 @@ async def LoginGetToken():
     return response.json()
 
 async def EnterTable(websocket, login_data):
-    LoginTable = login_data['GameList'][0]['TableList'][0]['TableId']
+    LoginTable = login_data['Data']['GameList'][0]['TableList'][0]['TableId']
     EnterTable_data = {
         "OpCode": "EnterTable",
         "Data": {
