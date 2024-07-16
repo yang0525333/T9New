@@ -1,13 +1,13 @@
-import requests
 import asyncio
+import requests
 import websockets
-import base64
 import json
-import os
-import sqlite3
 import datetime
 import psycopg2
 from psycopg2 import Error
+
+# 設置消息隊列
+message_queue = asyncio.Queue()
 
 async def DB_connect():
     try:
@@ -22,57 +22,59 @@ async def DB_connect():
     except Error as e:
         print(f"Error connecting to PostgreSQL: {e}")
 
-    conn.commit()
     return conn
 
-async def Message_handler (conn , message):
-    if message['OpCode'] == 'RoundResult':
-        Table_id = message['TableId']
-        banker_points = message['BankerPoints']
-        player_points = message['PlayerPoints']
-        banker_cards = json.dumps(message['BankerCard'])
-        player_cards = json.dumps(message['PlayerCard'])
-        win_area = message['WinArea']
-        game_date = datetime.datetime.now()
-        Player_Win = False
-        Banker_Win = False
-        Tie_Game = False
-        Any_Pair = False
-        Perfect_Pair = False
-        Lucky_Six = False
-        Player_Pair = False
-        Banker_Pair = False
-        for Winner in win_area :
-            if Winner == 0 :
-                Banker_Win = True
-            elif Winner == 1 :
-                Player_Win = True
-            elif Winner == 2 :
-                Tie_Game = True
-            elif Winner == 4 :
-                Player_Pair = True 
-            elif Winner == 9 :
-                Any_Pair = True
-            elif Winner == 3 :
-                Banker_Pair = True
-            elif Winner == 6 or Winner == 26:
-                Lucky_Six = True
-            elif Winner == 10 :
-                Perfect_Pair = True 
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO game_result (table_id, game_date, banker_points, player_points, banker_card, player_card, player_win, banker_win, tie_game, any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-        ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
-        conn.commit()
-    elif message['OpCode'] == 'Shuffle' :
-        Event_time = datetime.datetime.now()
-        cursor = conn.cursor()
-        cursor.execute('''
-                INSERT INTO event (event_type , table_id , event_time)
+async def Message_handler(conn):
+    while True:
+        message = await message_queue.get()
+        if message['OpCode'] == 'RoundResult':
+            Table_id = message['TableId']
+            banker_points = message['BankerPoints']
+            player_points = message['PlayerPoints']
+            banker_cards = json.dumps(message['BankerCard'])
+            player_cards = json.dumps(message['PlayerCard'])
+            win_area = message['WinArea']
+            game_date = datetime.datetime.now()
+            Player_Win = False
+            Banker_Win = False
+            Tie_Game = False
+            Any_Pair = False
+            Perfect_Pair = False
+            Lucky_Six = False
+            Player_Pair = False
+            Banker_Pair = False
+            for Winner in win_area:
+                if Winner == 0:
+                    Banker_Win = True
+                elif Winner == 1:
+                    Player_Win = True
+                elif Winner == 2:
+                    Tie_Game = True
+                elif Winner == 4:
+                    Player_Pair = True
+                elif Winner == 9:
+                    Any_Pair = True
+                elif Winner == 3:
+                    Banker_Pair = True
+                elif Winner == 6 or Winner == 26:
+                    Lucky_Six = True
+                elif Winner == 10:
+                    Perfect_Pair = True
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO game_result (table_id, game_date, banker_points, player_points, banker_card, player_card, player_win, banker_win, tie_game, any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+            ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
+            conn.commit()
+        elif message['OpCode'] == 'Shuffle':
+            Event_time = datetime.datetime.now()
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO event (event_type, table_id, event_time)
                 VALUES (%s, %s, %s)
-            ''', (message['OpCode'] , message['TableId'], Event_time))
-        conn.commit()
+            ''', (message['OpCode'], message['TableId'], Event_time))
+            conn.commit()
+        message_queue.task_done()
 
 async def LoginGetToken():
     url = 'https://g.t9cn818.online/api/Lobby/login'
@@ -150,7 +152,7 @@ async def connect():
                                 print("Enter Table Message")
                                 await EnterTable(websocket=websocket, login_data=login_data)
                             elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'StartGame' or message_data['OpCode'] == 'Shuffle':
-                                await Message_handler(conn=conn , message=message_data)
+                                await message_queue.put(message_data)
                                 print(message_data)
                         except json.JSONDecodeError as e:
                             print(f"JSON decode error: {e}")
@@ -158,10 +160,9 @@ async def connect():
                             print(f"KeyError: {e}. Message: {message}")
                         except Exception as e:
                             print(f"Unexpected error: {e}")
-                        except :
+                        except:
                             print(f"Receive message error {message}")
                             
-
         except websockets.ConnectionClosed:
             conn.close()
             print("WebSocket connection closed, retrying immediately...")
@@ -170,4 +171,12 @@ async def connect():
             print(f"Error: {str(e)}")
             print("Retrying immediately...")
 
-asyncio.get_event_loop().run_until_complete(connect())
+# 啟動消息處理協程
+async def main():
+    conn = await DB_connect()
+    await asyncio.gather(
+        connect(),
+        Message_handler(conn)
+    )
+
+asyncio.run(main())
