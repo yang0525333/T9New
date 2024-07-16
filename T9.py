@@ -27,6 +27,7 @@ async def Message_handler(conn):
     while True:
         message = await message_queue.get()
         if message['OpCode'] == 'RoundResult':
+            print(message)
             Table_id = message['TableId']
             banker_points = message['BankerPoints']
             player_points = message['PlayerPoints']
@@ -65,7 +66,7 @@ async def Message_handler(conn):
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
             ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
             conn.commit()
-            print(f"Inserted RoundResult into database for Table {Table_id}")
+            print(f"RoundResult Table : {Table_id}")
         elif message['OpCode'] == 'Shuffle':
             Event_time = datetime.datetime.now()
             cursor = conn.cursor()
