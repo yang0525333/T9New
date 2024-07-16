@@ -6,7 +6,6 @@ import datetime
 import psycopg2
 from psycopg2 import Error
 
-# 設置消息隊列
 message_queue = asyncio.Queue()
 
 async def DB_connect():
@@ -66,6 +65,7 @@ async def Message_handler(conn):
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
             ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
             conn.commit()
+            print(f"Inserted RoundResult into database for Table {Table_id}")
         elif message['OpCode'] == 'Shuffle':
             Event_time = datetime.datetime.now()
             cursor = conn.cursor()
@@ -74,6 +74,7 @@ async def Message_handler(conn):
                 VALUES (%s, %s, %s)
             ''', (message['OpCode'], message['TableId'], Event_time))
             conn.commit()
+            print(f"Inserted Shuffle record into database for Table {Table_id}")
         message_queue.task_done()
 
 async def LoginGetToken():
@@ -110,7 +111,8 @@ async def EnterTable(websocket, login_data):
     await websocket.send(json.dumps(EnterTable_data))
 
 async def connect():
-    while True:  # Outer loop for reconnecting
+    retry_attempts = 0
+    while True: 
         try:
             login_data = await LoginGetToken()
             conn = await DB_connect()
@@ -124,6 +126,7 @@ async def connect():
             }
 
             async with websockets.connect(url, extra_headers=headers) as websocket:
+                retry_attempts = 0 
                 if websocket:
                     auth_data = {
                         "OpCode": "LoginGame",
@@ -140,20 +143,19 @@ async def connect():
                     await websocket.send(json.dumps(auth_data))
                     print(auth_data)
 
-                    while True:  # Inner loop for receiving messages
+                    while True:  
                         message = await websocket.recv()
                         try:
                             message_data = json.loads(message)
                             if message_data['OpCode'] == 'DisConnected':
                                 print("WebSocket disconnected.")
-                                break  # Exit the inner loop and reconnect
+                                break 
 
                             elif message_data['OpCode'] == 'LoginGame':
                                 print("Enter Table Message")
                                 await EnterTable(websocket=websocket, login_data=login_data)
-                            elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'StartGame' or message_data['OpCode'] == 'Shuffle':
+                            elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'Shuffle':
                                 await message_queue.put(message_data)
-                                print(message_data)
                         except json.JSONDecodeError as e:
                             print(f"JSON decode error: {e}")
                         except KeyError as e:
@@ -162,16 +164,20 @@ async def connect():
                             print(f"Unexpected error: {e}")
                         except:
                             print(f"Receive message error {message}")
-                            
+
         except websockets.ConnectionClosed:
             conn.close()
-            print("WebSocket connection closed, retrying immediately...")
+            print("WebSocket connection closed.")
 
         except Exception as e:
+            retry_attempts += 1
             print(f"Error: {str(e)}")
-            print("Retrying immediately...")
+            print(f"Retrying in 5 minutes... (Attempt {retry_attempts})")
+            await asyncio.sleep(300)  
 
-# 啟動消息處理協程
+        finally:
+            await asyncio.sleep(1)
+
 async def main():
     conn = await DB_connect()
     await asyncio.gather(
