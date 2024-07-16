@@ -207,7 +207,11 @@ async def restart_worker_after(interval):
     while True:
         await asyncio.sleep(interval)
         print("Restarting worker...")
-        asyncio.create_task(main())
-
+        asyncio.create_task(main()) 
+        global conn  
+        if conn:
+            conn.close()
+            print("Closed previous DB connection.")
+            
 if __name__ == "__main__":
     asyncio.run(restart_worker_after(interval=10))  
