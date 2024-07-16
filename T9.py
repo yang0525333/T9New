@@ -134,7 +134,6 @@ async def periodic_sync(websocket, login_data, interval=5):
             print(f'Synctime Exception error: {e}')
 
 async def connect():
-    global conn  # 声明使用全局变量conn
     while True:
         try:
             login_data = await LoginGetToken()
@@ -200,17 +199,19 @@ async def receive_messages(websocket, login_data, conn):
             print(f"Receive message error {message}")
 
 async def main():
-    global conn  # 声明使用全局变量conn
-    async with conn:  # 使用async with确保在使用完后自动关闭连接
-        await asyncio.gather(
-            connect(),
-            Message_handler(conn)
-        )
+    global conn
+    conn = await DB_connect()
+    await asyncio.gather(
+        connect(),
+        Message_handler(conn)
+    )
 
 async def restart_worker_after(interval):
+    global conn
     while True:
         await asyncio.sleep(interval)
         print("Restarting worker...")
+        conn.close()
         asyncio.create_task(main())
 
 async def start():
