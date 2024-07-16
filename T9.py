@@ -162,7 +162,7 @@ async def connect():
                 print(auth_data)
 
                 await asyncio.gather(
-                    periodic_sync(websocket, login_data),  # Start periodic sync
+                    periodic_sync(websocket, login_data),  # 开始定时同步
                     receive_messages(websocket, login_data, conn)
                 )
 
@@ -172,8 +172,6 @@ async def connect():
 
         except Exception as e:
             print(f"Error: {str(e)}")
-
-        await asyncio.sleep(30)  
 
 async def receive_messages(websocket, login_data, conn):
     while True:
@@ -205,4 +203,11 @@ async def main():
         Message_handler(conn)
     )
 
-asyncio.run(main())
+async def restart_worker_after(interval):
+    while True:
+        await asyncio.sleep(interval)
+        print("Restarting worker...")
+        asyncio.create_task(main())
+
+if __name__ == "__main__":
+    asyncio.run(restart_worker_after(interval=10))  
