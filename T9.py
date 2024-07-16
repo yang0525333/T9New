@@ -102,7 +102,7 @@ async def EnterTable(websocket, login_data):
         "OpCode": "EnterTable",
         "Data": {
             "GameType": "80001",
-            "TableId": "99",
+            "TableId": "150",
             "EnterTableInLobby": "true"
         },
         "Token": login_data['Data']['Token']
