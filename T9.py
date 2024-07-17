@@ -245,16 +245,21 @@ async def main():
         print(f"Exception in main: {e}")
 
 async def restart_worker_after(interval):
+    global main_task_instance
     while True:
         await asyncio.sleep(interval)
         print("Restarting worker...")
-        asyncio.create_task(main())
+        if main_task_instance:
+            main_task_instance.cancel()  # Cancel the current main_task instance
+        main_task_instance = asyncio.create_task(main())  # Start a new main_task
 
 async def start():
-    main_task = asyncio.create_task(main())
-    restart_task = asyncio.create_task(restart_worker_after(interval=30))
-    await main_task 
-    await restart_task  
+    global main_task_instance
+    main_task_instance = asyncio.create_task(main())
+    restart_task_instance = asyncio.create_task(restart_worker_after(interval=30))
+    await main_task_instance
+    await restart_task_instance
 
 if __name__ == "__main__":
+    main_task_instance = None
     asyncio.run(start())
