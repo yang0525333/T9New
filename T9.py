@@ -39,6 +39,7 @@ async def release_db_connection(conn):
         print(f"Error releasing connection back to pool: {e}")
 
 async def Message_handler():
+    global websocket_connection
     while True:
         message = await message_queue.get()
         if message['OpCode'] == 'RoundResult':
@@ -150,7 +151,7 @@ async def Synctime(login_data):
     try:
         if websocket_connection.open:
             await websocket_connection.send(json.dumps(SynctimeBody))
-            print("Synctime success.")
+            print("Send synctime success.")
         else:
             print("WebSocket connection is not open.")
     except websockets.ConnectionClosed as e:
@@ -246,21 +247,20 @@ async def main():
         print(f"Exception in main: {e}")
 
 async def restart_worker_after(interval):
-    global main_task_instance
+    global websocket_connection
     while True:
         await asyncio.sleep(interval)
         print("Restarting worker...")
-        if main_task_instance:
-            main_task_instance.cancel()  # Cancel the current main_task instance
-        main_task_instance = asyncio.create_task(main())  # Start a new main_task
+        if websocket_connection and websocket_connection.open:
+            await websocket_connection.close()
+            print("Closed old WebSocket connection.")
+        await asyncio.sleep(5)  # Give some time for the connection to close properly
+        await main()
 
 async def start():
-    global main_task_instance
-    main_task_instance = asyncio.create_task(main())
+    global websocket_connection
     restart_task_instance = asyncio.create_task(restart_worker_after(interval=30))
-    await main_task_instance
     await restart_task_instance
 
 if __name__ == "__main__":
-    main_task_instance = None
     asyncio.run(start())
