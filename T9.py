@@ -187,7 +187,8 @@ async def connect():
         }
 
         websocket_connection = await websockets.connect(url, extra_headers=headers)
-        print("Connected to WebSocket.")
+        print(websocket_connection)
+        print("-----------------Connected to WebSocket.-----------------")
         auth_data = {
             "OpCode": "LoginGame",
             "Data": {
@@ -257,10 +258,8 @@ async def restart_worker_after(interval):
         except Exception as e:
             print(f"Error closing WebSocket connection: {e}")
         
-        await asyncio.sleep(5)  # Give some time for the connection to close properly
-
+        await asyncio.sleep(1)
         main_task = asyncio.create_task(main())
-
         try:
             await asyncio.wait_for(main_task, timeout=interval)
         except asyncio.TimeoutError:
@@ -269,7 +268,7 @@ async def restart_worker_after(interval):
 
 async def start():
     global websocket_connection
-    restart_task_instance = asyncio.create_task(restart_worker_after(interval=300))
+    restart_task_instance = asyncio.create_task(restart_worker_after(interval=30))
     await restart_task_instance
 
 if __name__ == "__main__":
