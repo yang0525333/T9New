@@ -232,23 +232,18 @@ async def receive_messages():
             print(f"Unexpected error: {e}")
 
 async def main():
-    global main_task
     try:
         await init_db_pool()
         await connect()
-        main_task = asyncio.create_task(
-            asyncio.gather(
-                Message_handler(),
-                periodic_sync(),
-                receive_messages()
-            )
+        await asyncio.gather(
+            Message_handler(),
+            periodic_sync(),
+            receive_messages()
         )
-        await main_task
     except Exception as e:
         print(f"Exception in main: {e}")
 
 async def start():
-    global websocket_connection
     try:
         await main()
     except Exception as e:
