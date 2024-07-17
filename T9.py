@@ -178,7 +178,7 @@ async def connect():
     try:
         login_data = await LoginGetToken()
         websocketURL = login_data['Data']['ConnectIds'][0]
-        url = f'wss://g.t9cn818.online/api/baccarat{websocketURL}'
+        url = f'wss://p.t9live3.vip/api/baccarat{websocketURL}'
         print(url)
 
         headers = {
