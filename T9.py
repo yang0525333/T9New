@@ -155,13 +155,13 @@ async def Synctime():
             print("Send synctime success.")
         else:
             print("WebSocket connection is not open.")
-            await restart_worker()  # Trigger restart logic
+            await restart_worker()  
     except websockets.ConnectionClosed as e:
         print(f"WebSocket connection closed unexpectedly: {e}")
-        await restart_worker()  # Trigger restart logic
+        await restart_worker() 
     except Exception as e:
         print(f"Error sending SyncTime message: {e}")
-        await restart_worker()  # Trigger restart logic
+        await restart_worker()  
 
 async def periodic_sync(interval=5):
     global websocket_connection
@@ -245,12 +245,6 @@ async def main():
     except Exception as e:
         print(f"Exception in main: {e}")
 
-async def restart_worker_after(interval):
-    global websocket_connection, login_data
-    while True:
-        await restart_worker()
-        await asyncio.sleep(interval)
-
 async def restart_worker():
     global websocket_connection, login_data
     try:
@@ -264,14 +258,15 @@ async def restart_worker():
         print(f"Error closing WebSocket connection: {e}")
     main_task = asyncio.create_task(main())
     try:
-        await asyncio.wait_for(main_task, timeout=3601)
+        await asyncio.wait_for(main_task, timeout=30)
     except asyncio.TimeoutError:
         main_task.cancel()
         print("----Task cancel----")
+        restart_worker()
 
 async def start():
     global websocket_connection
-    restart_task_instance = asyncio.create_task(restart_worker_after(interval=30))
+    restart_task_instance = asyncio.create_task(restart_worker())
     await restart_task_instance
 
 if __name__ == "__main__":
