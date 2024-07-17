@@ -262,7 +262,7 @@ async def restart_worker():
             login_data = None
         if main_task:
             main_task.cancel()
-            await asyncio.wait_for(main_task,timeout=30)
+            await asyncio.wait_for(main_task, timeout=30)
     except Exception as e:
         print(f"Error closing WebSocket connection: {e}")
     await main()
@@ -274,5 +274,4 @@ async def start():
     except Exception as e:
         print(f"Error starting application: {e}")
 
-if __name__ == "__main__":
-    asyncio.run(start())
+asyncio.run(start())
