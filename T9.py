@@ -217,11 +217,14 @@ async def receive_messages(websocket, login_data):
             print(f"Unexpected error: {e}")
 
 async def main():
-    await init_db_pool()
-    await asyncio.gather(
-        connect(),
-        Message_handler()
-    )
+    try:
+        await init_db_pool()
+        await asyncio.gather(
+            connect(),
+            Message_handler()
+        )
+    except Exception as e:
+        print(f"Exception in main: {e}")
 
 async def restart_worker_after(interval):
     while True:
@@ -230,8 +233,10 @@ async def restart_worker_after(interval):
         asyncio.create_task(main())
 
 async def start():
-    await main()
-    asyncio.create_task(restart_worker_after(interval=120))
+    main_task = asyncio.create_task(main())
+    restart_task = asyncio.create_task(restart_worker_after(interval=120))
+    await main_task 
+    await restart_task  
 
 if __name__ == "__main__":
     asyncio.run(start())
