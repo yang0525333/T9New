@@ -251,7 +251,7 @@ async def restart_worker_after(interval):
         await restart_worker()
         await asyncio.sleep(interval)
 
-async def restart_worker(interval):
+async def restart_worker():
     global websocket_connection, login_data
     try:
         print("Restarting worker...")
@@ -264,7 +264,7 @@ async def restart_worker(interval):
         print(f"Error closing WebSocket connection: {e}")
     main_task = asyncio.create_task(main())
     try:
-        await asyncio.wait_for(main_task, timeout=interval)
+        await asyncio.wait_for(main_task, timeout=3601)
     except asyncio.TimeoutError:
         main_task.cancel()
         print("----Task cancel----")
