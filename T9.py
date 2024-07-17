@@ -9,6 +9,7 @@ from psycopg2 import Error, pool
 message_queue = asyncio.Queue()
 db_pool = None
 websocket_connection = None
+login_data = None
 
 async def init_db_pool():
     global db_pool
@@ -139,8 +140,8 @@ async def EnterTable(websocket, login_data):
     print(EnterTable_data)
     await websocket.send(json.dumps(EnterTable_data))
 
-async def Synctime(login_data):
-    global websocket_connection
+async def Synctime():
+    global websocket_connection, login_data
     SynctimeBody = {
         "OpCode": "SyncTime",
         "Data": {
@@ -154,27 +155,29 @@ async def Synctime(login_data):
             print("Send synctime success.")
         else:
             print("WebSocket connection is not open.")
+            await restart_worker()  # Trigger restart logic
     except websockets.ConnectionClosed as e:
         print(f"WebSocket connection closed unexpectedly: {e}")
+        await restart_worker()  # Trigger restart logic
     except Exception as e:
         print(f"Error sending SyncTime message: {e}")
+        await restart_worker()  # Trigger restart logic
 
-async def periodic_sync(login_data, interval=5):
+async def periodic_sync(interval=5):
     global websocket_connection
     while True:
         try:
             await asyncio.sleep(interval)
-            await asyncio.ensure_future(Synctime(login_data))
+            await asyncio.ensure_future(Synctime())
         except Exception as e:
             print(f'periodic_sync Exception error: {e}')
 
 async def connect():
-    global websocket_connection
+    global websocket_connection , login_data
     if websocket_connection and websocket_connection.open:
         print("Closing previous WebSocket connection...")
         await websocket_connection.close()
         print(websocket_connection)
-
     try:
         login_data = await LoginGetToken()
         websocketURL = login_data['Data']['ConnectIds'][0]
@@ -185,7 +188,6 @@ async def connect():
             'Origin': 'https://g.t9cn818.online',
             'Host': 'g.t9cn818.online'
         }
-
         websocket_connection = await websockets.connect(url, extra_headers=headers)
         print(websocket_connection)
         print("-----------------Connected to WebSocket.-----------------")
@@ -204,18 +206,13 @@ async def connect():
         await websocket_connection.send(json.dumps(auth_data))
         print(auth_data)
 
-        await asyncio.gather(
-            periodic_sync(login_data),  
-            receive_messages(login_data)
-        )
-
     except websockets.ConnectionClosed:
         print("WebSocket connection closed.")
 
     except Exception as e:
         print(f"Error: {str(e)}")
 
-async def receive_messages(login_data):
+async def receive_messages():
     global websocket_connection
     while True:
         message = await websocket_connection.recv()
@@ -224,7 +221,6 @@ async def receive_messages(login_data):
             if message_data['OpCode'] == 'DisConnected':
                 print("WebSocket disconnected.")
                 break 
-
             elif message_data['OpCode'] == 'LoginGame':
                 print("Enter Table Message")
                 await EnterTable(websocket=websocket_connection, login_data=login_data)
@@ -240,35 +236,42 @@ async def receive_messages(login_data):
 async def main():
     try:
         await init_db_pool()
+        await connect()
         await asyncio.gather(
-            connect(),
-            Message_handler()
+            Message_handler(),
+            periodic_sync(),
+            receive_messages()
         )
     except Exception as e:
         print(f"Exception in main: {e}")
 
 async def restart_worker_after(interval):
-    global websocket_connection
+    global websocket_connection, login_data
     while True:
-        try:
-            print("Restarting worker...")
-            if websocket_connection and websocket_connection.open:
-                await websocket_connection.close()
-                print("Closed old WebSocket connection.")
-        except Exception as e:
-            print(f"Error closing WebSocket connection: {e}")
-        
-        await asyncio.sleep(1)
-        main_task = asyncio.create_task(main())
-        try:
-            await asyncio.wait_for(main_task, timeout=interval)
-        except asyncio.TimeoutError:
-            main_task.cancel()
-            print("----Task cancel----")
+        await restart_worker()
+        await asyncio.sleep(interval)
+
+async def restart_worker(interval):
+    global websocket_connection, login_data
+    try:
+        print("Restarting worker...")
+        if websocket_connection and websocket_connection.open:
+            await websocket_connection.close()
+            print("Closed old WebSocket connection.")
+            websocket_connection = None
+            login_data = None
+    except Exception as e:
+        print(f"Error closing WebSocket connection: {e}")
+    main_task = asyncio.create_task(main())
+    try:
+        await asyncio.wait_for(main_task, timeout=interval)
+    except asyncio.TimeoutError:
+        main_task.cancel()
+        print("----Task cancel----")
 
 async def start():
     global websocket_connection
-    restart_task_instance = asyncio.create_task(restart_worker_after(interval=3600))
+    restart_task_instance = asyncio.create_task(restart_worker_after(interval=30))
     await restart_task_instance
 
 if __name__ == "__main__":
