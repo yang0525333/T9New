@@ -156,13 +156,10 @@ async def Synctime():
             print("Send synctime success.")
         else:
             print("WebSocket connection is not open.")
-            await restart_worker()
     except websockets.ConnectionClosed as e:
         print(f"WebSocket connection closed unexpectedly: {e}")
-        await restart_worker()
     except Exception as e:
         print(f"Error sending SyncTime message: {e}")
-        await restart_worker()
 
 async def periodic_sync(interval=5):
     global websocket_connection
@@ -234,43 +231,28 @@ async def receive_messages():
         except Exception as e:
             print(f"Unexpected error: {e}")
 
-
-
-async def restart_worker():
-    global websocket_connection, login_data, main_task
+async def main():
+    global main_task
     try:
-        print("Restarting worker...")
-        if websocket_connection and websocket_connection.open:
-            await websocket_connection.close()
-            print("Closed old WebSocket connection.")
-            websocket_connection = None
-            login_data = None
-        if main_task:
-            main_task.cancel()
-            try:
-                await init_db_pool()
-                await connect()
-                main_task = asyncio.create_task(
-                asyncio.gather(
+        await init_db_pool()
+        await connect()
+        main_task = asyncio.create_task(
+            asyncio.gather(
                 Message_handler(),
                 periodic_sync(),
                 receive_messages()
             )
         )
-            except Exception as e:
-                print(f"Exception in main: {e}")
-                await restart_worker()
-
-            await main_task
-            await asyncio.wait_for(main_task, timeout=30)
+        await main_task
     except Exception as e:
-        print(f"Error closing WebSocket connection: {e}")
+        print(f"Exception in main: {e}")
 
 async def start():
     global websocket_connection
     try:
-        await restart_worker()
+        await main()
     except Exception as e:
         print(f"Error starting application: {e}")
 
-asyncio.run(start())
+if __name__ == "__main__":
+    asyncio.run(start())
