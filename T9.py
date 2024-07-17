@@ -147,7 +147,7 @@ async def Synctime(websocket, login_data):
         "Token": login_data['Data']['Token']
     }
     try:
-        if websocket.state == websockets.State.OPEN:
+        if websocket.open:
             await websocket.send(json.dumps(SynctimeBody))
         else:
             print("WebSocket connection is not open.")
