@@ -230,7 +230,7 @@ async def restart_worker_after(interval):
         asyncio.create_task(main())
 
 async def start():
-    asyncio.create_task(main())
+    await main()
     asyncio.create_task(restart_worker_after(interval=120))
 
 if __name__ == "__main__":
