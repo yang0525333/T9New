@@ -234,14 +234,7 @@ async def receive_messages():
         except Exception as e:
             print(f"Unexpected error: {e}")
 
-async def main():
-    global main_task
-    try:
-        await init_db_pool()
-        await connect()
-    except Exception as e:
-        print(f"Exception in main: {e}")
-        await restart_worker()
+
 
 async def restart_worker():
     global websocket_connection, login_data, main_task
@@ -254,18 +247,24 @@ async def restart_worker():
             login_data = None
         if main_task:
             main_task.cancel()
-            main_task = asyncio.create_task(
-            asyncio.gather(
+            try:
+                await init_db_pool()
+                await connect()
+                main_task = asyncio.create_task(
+                asyncio.gather(
                 Message_handler(),
                 periodic_sync(),
                 receive_messages()
             )
         )
+            except Exception as e:
+                print(f"Exception in main: {e}")
+                await restart_worker()
+
             await main_task
             await asyncio.wait_for(main_task, timeout=30)
     except Exception as e:
         print(f"Error closing WebSocket connection: {e}")
-    await main()
 
 async def start():
     global websocket_connection
