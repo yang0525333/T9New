@@ -146,7 +146,12 @@ async def Synctime(websocket, login_data):
         },
         "Token": login_data['Data']['Token']
     }
-    await websocket.send(json.dumps(SynctimeBody))
+    try:
+        await websocket.send(json.dumps(SynctimeBody))
+    except websockets.ConnectionClosed as e:
+        print(f"WebSocket connection closed unexpectedly: {e}")
+    except Exception as e:
+        print(f"Error sending SyncTime message: {e}")
 
 async def periodic_sync(websocket, login_data, interval=5):
     while True:
