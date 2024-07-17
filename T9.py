@@ -150,6 +150,7 @@ async def Synctime(login_data):
     try:
         if websocket_connection.open:
             await websocket_connection.send(json.dumps(SynctimeBody))
+            print("Synctime success.")
         else:
             print("WebSocket connection is not open.")
     except websockets.ConnectionClosed as e:
