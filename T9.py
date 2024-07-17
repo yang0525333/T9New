@@ -8,6 +8,7 @@ from psycopg2 import Error, pool
 
 message_queue = asyncio.Queue()
 db_pool = None
+websocket_connection = None
 
 async def init_db_pool():
     global db_pool
@@ -156,44 +157,47 @@ async def periodic_sync(websocket, login_data, interval=5):
             print(f'Synctime Exception error: {e}')
 
 async def connect():
-    while True:
-        try:
-            login_data = await LoginGetToken()
-            websocketURL = login_data['Data']['ConnectIds'][0]
-            url = f'wss://g.t9cn818.online/api/baccarat{websocketURL}'
-            print(url)
+    global websocket_connection
+    if websocket_connection:
+        await websocket_connection.close()  # 如果已有連線，先關閉
 
-            headers = {
-                'Origin': 'https://g.t9cn818.online',
-                'Host': 'g.t9cn818.online'
-            }
+    try:
+        login_data = await LoginGetToken()
+        websocketURL = login_data['Data']['ConnectIds'][0]
+        url = f'wss://g.t9cn818.online/api/baccarat{websocketURL}'
+        print(url)
 
-            async with websockets.connect(url, extra_headers=headers) as websocket:
-                auth_data = {
-                    "OpCode": "LoginGame",
-                    "Data": {
-                        "AgentId": "19414",
-                        "MemberName": "386p2",
-                        "AccountType": "1",
-                        "Password": "aaa999",
-                        "GameType": "80001",
-                        "GetBroadCast": "1"
-                    },
-                    "Token": login_data['Data']['Token']
-                }
-                await websocket.send(json.dumps(auth_data))
-                print(auth_data)
+        headers = {
+            'Origin': 'https://g.t9cn818.online',
+            'Host': 'g.t9cn818.online'
+        }
 
-                await asyncio.gather(
-                    periodic_sync(websocket, login_data),  
-                    receive_messages(websocket, login_data)
-                )
+        websocket_connection = await websockets.connect(url, extra_headers=headers)
+        auth_data = {
+            "OpCode": "LoginGame",
+            "Data": {
+                "AgentId": "19414",
+                "MemberName": "386p2",
+                "AccountType": "1",
+                "Password": "aaa999",
+                "GameType": "80001",
+                "GetBroadCast": "1"
+            },
+            "Token": login_data['Data']['Token']
+        }
+        await websocket_connection.send(json.dumps(auth_data))
+        print(auth_data)
 
-        except websockets.ConnectionClosed:
-            print("WebSocket connection closed.")
+        await asyncio.gather(
+            periodic_sync(websocket_connection, login_data),  
+            receive_messages(websocket_connection, login_data)
+        )
 
-        except Exception as e:
-            print(f"Error: {str(e)}")
+    except websockets.ConnectionClosed:
+        print("WebSocket connection closed.")
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
 
 async def receive_messages(websocket, login_data):
     while True:
