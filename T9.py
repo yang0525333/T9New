@@ -10,6 +10,7 @@ message_queue = asyncio.Queue()
 db_pool = None
 websocket_connection = None
 login_data = None
+main_task = None
 
 async def init_db_pool():
     global db_pool
@@ -155,25 +156,25 @@ async def Synctime():
             print("Send synctime success.")
         else:
             print("WebSocket connection is not open.")
-            await restart_worker()  
+            await restart_worker()
     except websockets.ConnectionClosed as e:
         print(f"WebSocket connection closed unexpectedly: {e}")
-        await restart_worker() 
+        await restart_worker()
     except Exception as e:
         print(f"Error sending SyncTime message: {e}")
-        await restart_worker()  
+        await restart_worker()
 
 async def periodic_sync(interval=5):
     global websocket_connection
     while True:
         try:
             await asyncio.sleep(interval)
-            await asyncio.ensure_future(Synctime())
+            asyncio.ensure_future(Synctime())
         except Exception as e:
             print(f'periodic_sync Exception error: {e}')
 
 async def connect():
-    global websocket_connection , login_data
+    global websocket_connection, login_data
     if websocket_connection and websocket_connection.open:
         print("Closing previous WebSocket connection...")
         await websocket_connection.close()
@@ -220,7 +221,7 @@ async def receive_messages():
             message_data = json.loads(message)
             if message_data['OpCode'] == 'DisConnected':
                 print("WebSocket disconnected.")
-                break 
+                break
             elif message_data['OpCode'] == 'LoginGame':
                 print("Enter Table Message")
                 await EnterTable(websocket=websocket_connection, login_data=login_data)
@@ -234,19 +235,24 @@ async def receive_messages():
             print(f"Unexpected error: {e}")
 
 async def main():
+    global main_task
     try:
         await init_db_pool()
         await connect()
-        await asyncio.gather(
-            Message_handler(),
-            periodic_sync(),
-            receive_messages()
+        main_task = asyncio.create_task(
+            asyncio.gather(
+                Message_handler(),
+                periodic_sync(),
+                receive_messages()
+            )
         )
+        await main_task
     except Exception as e:
         print(f"Exception in main: {e}")
+        await restart_worker()
 
 async def restart_worker():
-    global websocket_connection, login_data
+    global websocket_connection, login_data, main_task
     try:
         print("Restarting worker...")
         if websocket_connection and websocket_connection.open:
@@ -254,20 +260,19 @@ async def restart_worker():
             print("Closed old WebSocket connection.")
             websocket_connection = None
             login_data = None
+        if main_task:
+            main_task.cancel()
+            await main_task  # Ensure main_task is properly cancelled
     except Exception as e:
         print(f"Error closing WebSocket connection: {e}")
-    main_task = asyncio.create_task(main())
-    try:
-        await asyncio.wait_for(main_task, timeout=30)
-    except asyncio.TimeoutError:
-        main_task.cancel()
-        print("----Task cancel----")
-        restart_worker()
+    await main()
 
 async def start():
     global websocket_connection
-    restart_task_instance = asyncio.create_task(restart_worker())
-    await restart_task_instance
+    try:
+        await restart_worker()
+    except Exception as e:
+        print(f"Error starting application: {e}")
 
 if __name__ == "__main__":
     asyncio.run(start())
