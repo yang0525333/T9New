@@ -157,6 +157,9 @@ async def Synctime(websocket, login_data):
         print(f"Error sending SyncTime message: {e}")
 
 async def periodic_sync(websocket, login_data, interval=5):
+    print("------------------------------------------websocket---------------------------------------")
+    print(websocket)
+    print("----------------------------------")
     while True:
         try:
             await asyncio.sleep(interval)
