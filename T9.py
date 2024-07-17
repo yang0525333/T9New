@@ -159,7 +159,9 @@ async def periodic_sync(websocket, login_data, interval=5):
 async def connect():
     global websocket_connection
     if websocket_connection:
-        await websocket_connection.close()  # 如果已有連線，先關閉
+        print("Websockets close before restart")
+        print(websocket_connection)
+        await websocket_connection.close()
 
     try:
         login_data = await LoginGetToken()
@@ -238,7 +240,7 @@ async def restart_worker_after(interval):
 
 async def start():
     main_task = asyncio.create_task(main())
-    restart_task = asyncio.create_task(restart_worker_after(interval=1800))
+    restart_task = asyncio.create_task(restart_worker_after(interval=30))
     await main_task 
     await restart_task  
 
