@@ -159,11 +159,12 @@ async def Synctime(websocket, login_data):
     except Exception as e:
         print(f"Error sending SyncTime message: {e}")
 
-async def periodic_sync(websocket, login_data, interval=5):
+async def periodic_sync(login_data, interval=5):
+    global websocket_connection
     while True:
         try:
             await asyncio.sleep(interval)
-            await asyncio.ensure_future(Synctime(websocket, login_data))
+            await asyncio.ensure_future(Synctime(websocket_connection, login_data))
         except Exception as e:
             print(f'Synctime Exception error: {e}')
 
@@ -171,6 +172,7 @@ async def connect():
     global websocket_connection
     if websocket_connection and websocket_connection.open:
         print("Closing previous WebSocket connection...")
+        websocket_connection = None
         await websocket_connection.close()
 
     try:
@@ -202,8 +204,8 @@ async def connect():
         print(auth_data)
 
         await asyncio.gather(
-            periodic_sync(websocket_connection, login_data),  
-            receive_messages(websocket_connection, login_data)
+            periodic_sync(login_data),  
+            receive_messages(login_data)
         )
 
     except websockets.ConnectionClosed:
@@ -212,9 +214,10 @@ async def connect():
     except Exception as e:
         print(f"Error: {str(e)}")
 
-async def receive_messages(websocket, login_data):
+async def receive_messages(login_data):
+    global websocket_connection
     while True:
-        message = await websocket.recv()
+        message = await websocket_connection.recv()
         try:
             message_data = json.loads(message)
             if message_data['OpCode'] == 'DisConnected':
@@ -223,7 +226,7 @@ async def receive_messages(websocket, login_data):
 
             elif message_data['OpCode'] == 'LoginGame':
                 print("Enter Table Message")
-                await EnterTable(websocket=websocket, login_data=login_data)
+                await EnterTable(websocket=websocket_connection, login_data=login_data)
             elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'Shuffle':
                 await message_queue.put(message_data)
         except json.JSONDecodeError as e:
