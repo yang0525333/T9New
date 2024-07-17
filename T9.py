@@ -140,9 +140,6 @@ async def EnterTable(websocket, login_data):
 
 async def Synctime(login_data):
     global websocket_connection
-    print("------------------------------------------websocket---------------------------------------")
-    print(websocket_connection)
-    print("------------------------------------------websocket---------------------------------------")
     SynctimeBody = {
         "OpCode": "SyncTime",
         "Data": {
@@ -174,6 +171,7 @@ async def connect():
     if websocket_connection and websocket_connection.open:
         print("Closing previous WebSocket connection...")
         await websocket_connection.close()
+        print(websocket_connection)
 
     try:
         login_data = await LoginGetToken()
