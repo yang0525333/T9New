@@ -268,7 +268,7 @@ async def restart_worker_after(interval):
 
 async def start():
     global websocket_connection
-    restart_task_instance = asyncio.create_task(restart_worker_after(interval=30))
+    restart_task_instance = asyncio.create_task(restart_worker_after(interval=3600))
     await restart_task_instance
 
 if __name__ == "__main__":
