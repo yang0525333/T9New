@@ -180,6 +180,7 @@ async def connect():
         }
 
         websocket_connection = await websockets.connect(url, extra_headers=headers)
+        print("new " + f"{websocket_connection}")
         auth_data = {
             "OpCode": "LoginGame",
             "Data": {
