@@ -172,7 +172,6 @@ async def connect():
     global websocket_connection
     if websocket_connection and websocket_connection.open:
         print("Closing previous WebSocket connection...")
-        websocket_connection = None
         await websocket_connection.close()
 
     try:
