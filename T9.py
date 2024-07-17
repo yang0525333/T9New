@@ -160,7 +160,6 @@ async def Synctime(websocket, login_data):
         print(f"Error sending SyncTime message: {e}")
 
 async def periodic_sync(websocket, login_data, interval=5):
-
     while True:
         try:
             await asyncio.sleep(interval)
@@ -170,9 +169,8 @@ async def periodic_sync(websocket, login_data, interval=5):
 
 async def connect():
     global websocket_connection
-    if websocket_connection:
-        print("Websockets close before restart")
-        print(websocket_connection)
+    if websocket_connection and websocket_connection.open:
+        print("Closing previous WebSocket connection...")
         await websocket_connection.close()
 
     try:
@@ -187,7 +185,7 @@ async def connect():
         }
 
         websocket_connection = await websockets.connect(url, extra_headers=headers)
-        print("new " + f"{websocket_connection}")
+        print("Connected to WebSocket.")
         auth_data = {
             "OpCode": "LoginGame",
             "Data": {
