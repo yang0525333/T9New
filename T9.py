@@ -139,6 +139,9 @@ async def EnterTable(websocket, login_data):
     await websocket.send(json.dumps(EnterTable_data))
 
 async def Synctime(websocket, login_data):
+    print("------------------------------------------websocket---------------------------------------")
+    print(websocket)
+    print("------------------------------------------websocket---------------------------------------")
     SynctimeBody = {
         "OpCode": "SyncTime",
         "Data": {
@@ -157,9 +160,7 @@ async def Synctime(websocket, login_data):
         print(f"Error sending SyncTime message: {e}")
 
 async def periodic_sync(websocket, login_data, interval=5):
-    print("------------------------------------------websocket---------------------------------------")
-    print(websocket)
-    print("----------------------------------")
+
     while True:
         try:
             await asyncio.sleep(interval)
