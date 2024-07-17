@@ -89,8 +89,7 @@ def search_data():
             data = cursor.fetchall()
             conn.close()
             print(data)
-
-            # Add 8 hours to start_time and end_time
+            # change time zone
             start_time = (start_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
             end_time = (end_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
             
@@ -121,11 +120,20 @@ def get_table_details():
         cursor = conn.cursor()
 
         cursor.execute('''
-            SELECT MAX(event_time) 
-            FROM event 
-            WHERE table_id = %s AND event_type = 'Shuffle';
+            SELECT event_time
+            FROM (
+                SELECT event_time, 
+                    ROW_NUMBER() OVER (ORDER BY event_time DESC) AS row_num
+                FROM event
+                WHERE table_id = %s AND event_type = 'Shuffle'
+            ) AS subquery
+            WHERE row_num <= 2
+            ORDER BY event_time DESC;
         ''', (table_id,))
-        last_shuffle_time = cursor.fetchone()[0]
+
+        results = cursor.fetchall()
+        last_shuffle_time = results[0][0] if len(results) > 0 else None
+        second_last_shuffle_time = results[1][0] if len(results) > 1 else None
         print(last_shuffle_time)
         if last_shuffle_time:
             cursor.execute('''
@@ -146,13 +154,36 @@ def get_table_details():
             game_results = cursor.fetchall()
         else:
             game_results = []
+        if second_last_shuffle_time:
+            cursor.execute('''
+                SELECT 
+                    COUNT(CASE WHEN player_win THEN 1 END) AS player_win_count,
+                    COUNT(CASE WHEN banker_win THEN 1 END) AS banker_win_count,
+                    COUNT(CASE WHEN tie_game THEN 1 END) AS tie_game_count,
+                    COUNT(CASE WHEN any_pair THEN 1 END) AS any_pair_count,
+                    COUNT(CASE WHEN perfect_pair THEN 1 END) AS perfect_pair_count,
+                    COUNT(CASE WHEN lucky_six THEN 1 END) AS lucky_six_count,
+                    COUNT(CASE WHEN player_pair THEN 1 END) AS player_pair_count,
+                    COUNT(CASE WHEN banker_pair THEN 1 END) AS banker_pair_count
+                FROM 
+                    game_result
+                WHERE 
+                    table_id = %s AND game_date BETWEEN %s AND %s
+            ''', (table_id, second_last_shuffle_time , last_shuffle_time))
+            game_results2 = cursor.fetchall()
+        else:
+            game_results = []
         conn.close()
         if last_shuffle_time:
             last_shuffle_time = (last_shuffle_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+        if second_last_shuffle_time:
+            second_last_shuffle_time = (second_last_shuffle_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
 
         return jsonify({
             'last_shuffle_time': last_shuffle_time,
-            'game_results': game_results
+            'second_last_shuffle_time' : second_last_shuffle_time,
+            'game_results': game_results,
+            'game_results2' : game_results2
         })
 
     except psycopg2.Error as e:
