@@ -258,22 +258,20 @@ async def restart_worker_after(interval):
             print(f"Error closing WebSocket connection: {e}")
         
         await asyncio.sleep(5)  # Give some time for the connection to close properly
-        
-        # Restart main task
+
         main_task = asyncio.create_task(main())
-        
-        # Cancel old task
+
         try:
             await asyncio.wait_for(main_task, timeout=interval)
         except asyncio.TimeoutError:
-            print("Main task took too long to complete; cancelling...")
             main_task.cancel()
+            print("----Task cancel----")
         
         await asyncio.sleep(interval)
 
 async def start():
     global websocket_connection
-    restart_task_instance = asyncio.create_task(restart_worker_after(interval=30))
+    restart_task_instance = asyncio.create_task(restart_worker_after(interval=3600))
     await restart_task_instance
 
 if __name__ == "__main__":
