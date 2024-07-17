@@ -138,9 +138,10 @@ async def EnterTable(websocket, login_data):
     print(EnterTable_data)
     await websocket.send(json.dumps(EnterTable_data))
 
-async def Synctime(websocket, login_data):
+async def Synctime(login_data):
+    global websocket_connection
     print("------------------------------------------websocket---------------------------------------")
-    print(websocket)
+    print(websocket_connection)
     print("------------------------------------------websocket---------------------------------------")
     SynctimeBody = {
         "OpCode": "SyncTime",
@@ -150,8 +151,8 @@ async def Synctime(websocket, login_data):
         "Token": login_data['Data']['Token']
     }
     try:
-        if websocket.open:
-            await websocket.send(json.dumps(SynctimeBody))
+        if websocket_connection.open:
+            await websocket_connection.send(json.dumps(SynctimeBody))
         else:
             print("WebSocket connection is not open.")
     except websockets.ConnectionClosed as e:
@@ -164,9 +165,9 @@ async def periodic_sync(login_data, interval=5):
     while True:
         try:
             await asyncio.sleep(interval)
-            await asyncio.ensure_future(Synctime(websocket_connection, login_data))
+            await asyncio.ensure_future(Synctime(login_data))
         except Exception as e:
-            print(f'Synctime Exception error: {e}')
+            print(f'periodic_sync Exception error: {e}')
 
 async def connect():
     global websocket_connection
