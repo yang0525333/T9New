@@ -279,8 +279,10 @@ async def receive_messages():
                 login_data = None
                 db_pool = None
                 websocket_connection = None
+                print("Receive message break")
                 break
         except :
+            print("Receive message break")
             break
 
 
