@@ -11,6 +11,7 @@ db_pool = None
 websocket_connection = None
 login_data = None
 main_task = None
+Checksynctime = 0
 
 async def init_db_pool():
     global db_pool
@@ -151,7 +152,7 @@ async def EnterTable(websocket):
     await websocket.send(json.dumps(EnterTable_data))
 
 async def Synctime():
-    global websocket_connection, login_data , db_pool
+    global websocket_connection, login_data , db_pool , Checksynctime
     SynctimeBody = {
         "OpCode": "SyncTime",
         "Data": {
@@ -162,7 +163,12 @@ async def Synctime():
     try:
         if websocket_connection.open:
             await websocket_connection.send(json.dumps(SynctimeBody))
+            Checksynctime += 1
             print("Send synctime success.")
+            if Checksynctime > 7 :
+                asyncio.sleep(30)
+                Checksynctime = 0
+                return True
         else:
             print("WebSocket connection is not open.")
             websocket_connection = None
