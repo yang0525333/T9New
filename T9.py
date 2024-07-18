@@ -155,7 +155,7 @@ async def EnterTable(websocket):
     except:
         print("login failed")
         await asyncio.sleep(30)
-        websocket_connection.close()
+        await websocket_connection.close()
         websocket_connection = None
 
 async def Synctime():
@@ -176,7 +176,7 @@ async def Synctime():
                 print("No roundresult message over eight time , loop break 30 s")
                 await asyncio.sleep(30)
                 Checksynctime = 0
-                websocket_connection.close()
+                await websocket_connection.close()
                 websocket_connection = None
                 return True
         else:
