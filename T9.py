@@ -1,4 +1,4 @@
-import asyncio
+import asyncio , traceback
 import requests
 import websockets
 import json
@@ -224,9 +224,9 @@ async def connect():
         print(f"Error: {str(e)}")
 
 async def receive_messages():
-    global websocket_connection , login_data , db_pool
+    global websocket_connection, login_data, db_pool
     while True:
-        if websocket_connection.open :
+        if websocket_connection.open:
             message = await websocket_connection.recv()
             try:
                 message_data = json.loads(message)
@@ -244,6 +244,7 @@ async def receive_messages():
                 print(f"KeyError: {e}. Message: {message}")
             except Exception as e:
                 print(f"Unexpected error: {e}")
+                traceback.print_exc()  # 打印完整的异常堆栈跟踪
         else:
             login_data = None
             db_pool = None
