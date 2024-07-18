@@ -108,6 +108,12 @@ async def Message_handler():
                             print(f"Database error: {e}")
                         finally:
                             await release_db_connection(conn)
+                elif message['OpCode'] == 'DisConnected':
+                    print("Message websocket connect close.")
+                    db_pool = None
+                    login_data = None
+                    websocket_connection = None
+                    break
                 message_queue.task_done()
             else :
                 print("Message websocket connect close.")
@@ -261,7 +267,11 @@ async def receive_messages():
                 try:
                     message_data = json.loads(message)
                     if message_data['OpCode'] == 'DisConnected':
+                        await message_queue.put(message_data)
                         print("WebSocket disconnected.")
+                        websocket_connection = None
+                        login_data = None
+                        db_pool = None
                         break
                     elif message_data['OpCode'] == 'LoginGame':
                         print("Enter Table Message")
