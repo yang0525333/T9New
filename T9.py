@@ -134,7 +134,9 @@ async def LoginGetToken():
     print(response.json())
     return response.json()
 
-async def EnterTable(websocket, login_data):
+async def EnterTable(websocket):
+    global login_data
+    print(login_data)
     LoginTable = login_data['Data']['GameList'][0]['TableList'][0]['TableId']
     EnterTable_data = {
         "OpCode": "EnterTable",
@@ -184,7 +186,7 @@ async def periodic_sync(interval=5):
             print(f'periodic_sync Exception error: {e}')
 
 async def connect():
-    global websocket_connection, login_data
+    global websocket_connection, login_data , db_pool
     if websocket_connection and websocket_connection.open:
         print("Closing previous WebSocket connection...")
         await websocket_connection.close()
@@ -235,7 +237,7 @@ async def receive_messages():
                     break
                 elif message_data['OpCode'] == 'LoginGame':
                     print("Enter Table Message")
-                    await EnterTable(websocket=websocket_connection, login_data=login_data)
+                    await EnterTable(websocket=websocket_connection)
                 elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'Shuffle':
                     await message_queue.put(message_data)
             except json.JSONDecodeError as e:
