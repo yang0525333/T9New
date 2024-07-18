@@ -189,6 +189,10 @@ async def Synctime():
         print(f"WebSocket connection closed unexpectedly: {e}")
     except Exception as e:
         print(f"Error sending SyncTime message: {e}")
+        websocket_connection = None
+        db_pool = None
+        login_data = None
+        return True
 
 async def periodic_sync(interval=5):
     global websocket_connection , login_data , db_pool
