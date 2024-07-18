@@ -137,20 +137,26 @@ async def LoginGetToken():
     return response.json()
 
 async def EnterTable(websocket):
-    global login_data
+    global login_data , websocket_connection
     print(login_data)
-    LoginTable = login_data['Data']['GameList'][0]['TableList'][0]['TableId']
-    EnterTable_data = {
-        "OpCode": "EnterTable",
-        "Data": {
-            "GameType": "80001",
-            "TableId": LoginTable,
-            "EnterTableInLobby": "true"
-        },
-        "Token": login_data['Data']['Token']
-    }
-    print(EnterTable_data)
-    await websocket.send(json.dumps(EnterTable_data))
+    try :
+        LoginTable = login_data['Data']['GameList'][0]['TableList'][0]['TableId']
+        EnterTable_data = {
+            "OpCode": "EnterTable",
+            "Data": {
+                "GameType": "80001",
+                "TableId": LoginTable,
+                "EnterTableInLobby": "true"
+            },
+            "Token": login_data['Data']['Token']
+        }
+        print(EnterTable_data)
+        await websocket.send(json.dumps(EnterTable_data))
+    except:
+        print("login failed")
+        await asyncio.sleep(30)
+        websocket_connection.close()
+        websocket_connection = None
 
 async def Synctime():
     global websocket_connection, login_data , db_pool , Checksynctime
@@ -170,6 +176,8 @@ async def Synctime():
                 print("No roundresult message over eight time , loop break 30 s")
                 await asyncio.sleep(30)
                 Checksynctime = 0
+                websocket_connection.close()
+                websocket_connection = None
                 return True
         else:
             print("WebSocket connection is not open.")
