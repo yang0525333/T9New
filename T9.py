@@ -116,6 +116,7 @@ async def Message_handler():
                 websocket_connection = None
                 break
         except :
+            print("Message break")
             break
             
 
@@ -205,6 +206,7 @@ async def periodic_sync(interval=5):
             await asyncio.sleep(interval)
             connectclose = await Synctime()
             if connectclose == True:
+                print("periodic_sync break")
                 break
         except Exception as e:
             print("periodic_sync break")
