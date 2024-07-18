@@ -284,7 +284,8 @@ async def main():
             receive_messages()
         )
     except Exception as e:
-        print(f"Exception in main: {e}")
+        print("Main loop restart")
+        return
 
 async def start():
     while True:
