@@ -42,11 +42,12 @@ async def release_db_connection(conn):
         print(f"Error releasing connection back to pool: {e}")
 
 async def Message_handler():
-    global websocket_connection , db_pool , login_data
+    global websocket_connection , db_pool , login_data , Checksynctime
     while True:
         if websocket_connection.open :
             message = await message_queue.get()
             if message['OpCode'] == 'RoundResult':
+                Checksynctime = 0
                 print(message)
                 Table_id = message['TableId']
                 banker_points = message['BankerPoints']
@@ -166,6 +167,7 @@ async def Synctime():
             Checksynctime += 1
             print("Send synctime success.")
             if Checksynctime > 7 :
+                print("No roundresult message over eight time , loop break 30 s")
                 await asyncio.sleep(30)
                 Checksynctime = 0
                 return True
