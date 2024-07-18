@@ -203,7 +203,8 @@ async def periodic_sync(interval=5):
             if connectclose == True:
                 break
         except Exception as e:
-            print(f'periodic_sync Exception error: {e}')
+            print("periodic_sync break")
+            break
 
 async def connect():
     global websocket_connection, login_data , db_pool
