@@ -166,7 +166,7 @@ async def Synctime():
             Checksynctime += 1
             print("Send synctime success.")
             if Checksynctime > 7 :
-                asyncio.sleep(30)
+                await asyncio.sleep(30)
                 Checksynctime = 0
                 return True
         else:
