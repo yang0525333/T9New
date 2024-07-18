@@ -44,76 +44,80 @@ async def release_db_connection(conn):
 async def Message_handler():
     global websocket_connection , db_pool , login_data , Checksynctime
     while True:
-        if websocket_connection.open :
-            message = await message_queue.get()
-            if message['OpCode'] == 'RoundResult':
-                Checksynctime = 0
-                print(message)
-                Table_id = message['TableId']
-                banker_points = message['BankerPoints']
-                player_points = message['PlayerPoints']
-                banker_cards = json.dumps(message['BankerCard'])
-                player_cards = json.dumps(message['PlayerCard'])
-                win_area = message['WinArea']
-                game_date = datetime.datetime.now()
-                Player_Win = Banker_Win = Tie_Game = Any_Pair = Perfect_Pair = Lucky_Six = Player_Pair = Banker_Pair = False
+        try :
+            if websocket_connection.open :
+                message = await message_queue.get()
+                if message['OpCode'] == 'RoundResult':
+                    Checksynctime = 0
+                    print(message)
+                    Table_id = message['TableId']
+                    banker_points = message['BankerPoints']
+                    player_points = message['PlayerPoints']
+                    banker_cards = json.dumps(message['BankerCard'])
+                    player_cards = json.dumps(message['PlayerCard'])
+                    win_area = message['WinArea']
+                    game_date = datetime.datetime.now()
+                    Player_Win = Banker_Win = Tie_Game = Any_Pair = Perfect_Pair = Lucky_Six = Player_Pair = Banker_Pair = False
 
-                for Winner in win_area:
-                    if Winner == 0:
-                        Banker_Win = True
-                    elif Winner == 1:
-                        Player_Win = True
-                    elif Winner == 2:
-                        Tie_Game = True
-                    elif Winner == 4:
-                        Player_Pair = True
-                    elif Winner == 9:
-                        Any_Pair = True
-                    elif Winner == 3:
-                        Banker_Pair = True
-                    elif Winner in [6, 26]:
-                        Lucky_Six = True
-                    elif Winner == 10:
-                        Perfect_Pair = True
+                    for Winner in win_area:
+                        if Winner == 0:
+                            Banker_Win = True
+                        elif Winner == 1:
+                            Player_Win = True
+                        elif Winner == 2:
+                            Tie_Game = True
+                        elif Winner == 4:
+                            Player_Pair = True
+                        elif Winner == 9:
+                            Any_Pair = True
+                        elif Winner == 3:
+                            Banker_Pair = True
+                        elif Winner in [6, 26]:
+                            Lucky_Six = True
+                        elif Winner == 10:
+                            Perfect_Pair = True
 
-                conn = await get_db_connection()
-                if conn:
-                    try:
-                        cursor = conn.cursor()
-                        cursor.execute('''
-                            INSERT INTO game_result (table_id, game_date, banker_points, player_points, banker_card, player_card, player_win, banker_win, tie_game, any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
-                            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-                        ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
-                        conn.commit()
-                        print(f"RoundResult Table: {Table_id}")
-                    except Error as e:
-                        print(f"Database error: {e}")
-                    finally:
-                        await release_db_connection(conn)
+                    conn = await get_db_connection()
+                    if conn:
+                        try:
+                            cursor = conn.cursor()
+                            cursor.execute('''
+                                INSERT INTO game_result (table_id, game_date, banker_points, player_points, banker_card, player_card, player_win, banker_win, tie_game, any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
+                                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+                            ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
+                            conn.commit()
+                            print(f"RoundResult Table: {Table_id}")
+                        except Error as e:
+                            print(f"Database error: {e}")
+                        finally:
+                            await release_db_connection(conn)
 
-            elif message['OpCode'] == 'Shuffle':
-                Event_time = datetime.datetime.now()
-                conn = await get_db_connection()
-                if conn:
-                    try:
-                        cursor = conn.cursor()
-                        cursor.execute('''
-                            INSERT INTO event (event_type, table_id, event_time)
-                            VALUES (%s, %s, %s)
-                        ''', (message['OpCode'], message['TableId'], Event_time))
-                        conn.commit()
-                        print(f"Inserted Shuffle record into database for Table {message['TableId']}")
-                    except Error as e:
-                        print(f"Database error: {e}")
-                    finally:
-                        await release_db_connection(conn)
-            message_queue.task_done()
-        else :
-            print("Message websocket connect close.")
-            db_pool = None
-            login_data = None
-            websocket_connection = None
+                elif message['OpCode'] == 'Shuffle':
+                    Event_time = datetime.datetime.now()
+                    conn = await get_db_connection()
+                    if conn:
+                        try:
+                            cursor = conn.cursor()
+                            cursor.execute('''
+                                INSERT INTO event (event_type, table_id, event_time)
+                                VALUES (%s, %s, %s)
+                            ''', (message['OpCode'], message['TableId'], Event_time))
+                            conn.commit()
+                            print(f"Inserted Shuffle record into database for Table {message['TableId']}")
+                        except Error as e:
+                            print(f"Database error: {e}")
+                        finally:
+                            await release_db_connection(conn)
+                message_queue.task_done()
+            else :
+                print("Message websocket connect close.")
+                db_pool = None
+                login_data = None
+                websocket_connection = None
+                break
+        except :
             break
+            
 
 async def LoginGetToken():
     url = 'https://g.t9cn818.online/api/Lobby/login'
@@ -249,29 +253,32 @@ async def connect():
 async def receive_messages():
     global websocket_connection, login_data, db_pool
     while True:
-        if websocket_connection.open:
-            message = await websocket_connection.recv()
-            try:
-                message_data = json.loads(message)
-                if message_data['OpCode'] == 'DisConnected':
-                    print("WebSocket disconnected.")
-                    break
-                elif message_data['OpCode'] == 'LoginGame':
-                    print("Enter Table Message")
-                    await EnterTable(websocket=websocket_connection)
-                elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'Shuffle':
-                    await message_queue.put(message_data)
-            except json.JSONDecodeError as e:
-                print(f"JSON decode error: {e}")
-            except KeyError as e:
-                print(f"KeyError: {e}. Message: {message}")
-            except Exception as e:
-                print(f"Unexpected error: {e}")
-                traceback.print_exc()  # 打印完整的异常堆栈跟踪
-        else:
-            login_data = None
-            db_pool = None
-            websocket_connection = None
+        try :
+            if websocket_connection.open:
+                message = await websocket_connection.recv()
+                try:
+                    message_data = json.loads(message)
+                    if message_data['OpCode'] == 'DisConnected':
+                        print("WebSocket disconnected.")
+                        break
+                    elif message_data['OpCode'] == 'LoginGame':
+                        print("Enter Table Message")
+                        await EnterTable(websocket=websocket_connection)
+                    elif message_data['OpCode'] == 'RoundResult' or message_data['OpCode'] == 'Shuffle':
+                        await message_queue.put(message_data)
+                except json.JSONDecodeError as e:
+                    print(f"JSON decode error: {e}")
+                except KeyError as e:
+                    print(f"KeyError: {e}. Message: {message}")
+                except Exception as e:
+                    print(f"Unexpected error: {e}")
+                    traceback.print_exc()  
+            else:
+                login_data = None
+                db_pool = None
+                websocket_connection = None
+                break
+        except :
             break
 
 
