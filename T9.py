@@ -182,8 +182,8 @@ async def Synctime():
         if websocket_connection.open:
             await websocket_connection.send(json.dumps(SynctimeBody))
             Checksynctime += 1
-            print("Send synctime success.")
-            if Checksynctime > 7 :
+            print(f"Send synctime success. {Checksynctime}")
+            if Checksynctime > 10 :
                 print("No roundresult message over eight time , loop break 30 s")
                 await asyncio.sleep(30)
                 Checksynctime = 0
@@ -289,6 +289,10 @@ async def receive_messages():
                 login_data = None
                 db_pool = None
                 websocket_connection = None
+                DisconnectMessage = {
+                    "OpCode" : "DisConnected"
+                }
+                await message_queue.put(DisconnectMessage)
                 print("Receive message break")
                 break
         except :
