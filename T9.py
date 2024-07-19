@@ -183,12 +183,14 @@ async def Synctime():
             await websocket_connection.send(json.dumps(SynctimeBody))
             Checksynctime += 1
             print(f"Send synctime success. {Checksynctime}")
-            if Checksynctime > 2 :
+            if Checksynctime > 11 :
                 print("No roundresult message over eight time , loop break 30 s")
                 await asyncio.sleep(30)
                 Checksynctime = 0
                 await websocket_connection.close()
                 websocket_connection = None
+                login_data = None
+                db_pool = None
                 return True
         else:
             print("WebSocket connection is not open.")
