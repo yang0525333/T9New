@@ -22,6 +22,7 @@
         }
         form input[type="datetime-local"],
         form input[type="submit"],
+        form input[type="button"],
         form select {
             margin-right: 10px;
             font-size: 14px;
@@ -36,36 +37,6 @@
             border: 1px solid black;
             padding: 10px;
             text-align: center;
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-        }
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
         }
     </style>
 </head>
@@ -96,7 +67,6 @@
     <p>搜尋時間範圍：{{ start_time }} 至 {{ end_time }}</p>
     {% endif %}
     {% if data %}
-    
     <table>
         <tr>
             <th style="width: 10%;">桌號</th>
@@ -117,175 +87,26 @@
             {% set row2_total = row2_total + row[2] %}
             {% set row3_total = row3_total + row[3] %}
             {% set total = row1_total + row2_total + row3_total %}
-        <tr>
-            <td><button onclick="openModal('{{ row[0] }}')">{{ row[0] }}</button></td>
-            <td>{{ row[1] }}{% if total > 0 %} ({{ "%.2f" % ((row[1] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
-            <td>{{ row[2] }}{% if total > 0 %} ({{ "%.2f" % ((row[2] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
-            <td>{{ row[3] }}{% if total > 0 %} ({{ "%.2f" % ((row[3] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
-            <td>{{ row[4] }}</td>
-            <td>{{ row[5] }}</td>
-            <td>{{ row[6] }}</td>
-            <td>{{ row[7] }}</td>
-            <td>{{ row[8] }}</td>
-        </tr>
+            <tr>
+                {% if forloop.first %}
+                    <td>{{ row[0] }}</td>
+                {% else %}
+                    <td><button onclick="openModal('{{ row[0] }}')">{{ row[0] }}</button></td>
+                {% endif %}
+                <td>{{ row[1] }}{% if total > 0 %} ({{ "%.2f" % ((row[1] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
+                <td>{{ row[2] }}{% if total > 0 %} ({{ "%.2f" % ((row[2] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
+                <td>{{ row[3] }}{% if total > 0 %} ({{ "%.2f" % ((row[3] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
+                <td>{{ row[4] }}</td>
+                <td>{{ row[5] }}</td>
+                <td>{{ row[6] }}</td>
+                <td>{{ row[7] }}</td>
+                <td>{{ row[8] }}</td>
+            </tr>
         {% endfor %}
     </table>
     {% else %}
     <p>查無資料</p>
     {% endif %}
-    {% endif %}
-
-<div id="myModal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2 id="modalTitle">詳細資料</h2>
-        <p>近一次洗牌時間：<span id="lastShuffleTime"></span> 到 現在的資料</p>
-        <table id="modalTable">
-            <thead>
-                <tr>
-                    <th>閒贏</th>
-                    <th>莊贏</th>
-                    <th>和局</th>
-                    <th>任意對子</th>
-                    <th>完美對子</th>
-                    <th>幸運六</th>
-                    <th>閒家對子</th>
-                    <th>莊家對子</th>
-                </tr>
-            </thead>
-            <tbody id="modalRow">
-                {% for row in data %}
-                <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[2] }}</td>
-                    <td>{{ row[3] }}</td>
-                    <td>{{ row[4] }}</td>
-                    <td>{{ row[5] }}</td>
-                    <td>{{ row[6] }}</td>
-                    <td>{{ row[7] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <p>上上次洗牌時間：<span id="last2ShuffleTime"></span> 到 近一次洗牌</p>
-        <table id = "modalTable2">
-            <thead>
-                <tr>
-                    <th>閒贏</th>
-                    <th>莊贏</th>
-                    <th>和局</th>
-                    <th>任意對子</th>
-                    <th>完美對子</th>
-                    <th>幸運六</th>
-                    <th>閒家對子</th>
-                    <th>莊家對子</th>
-                </tr>
-            </thead>
-            <tbody id="modalRow2">
-                {% for row in data %}
-                <tr>
-                    <td>{{ row[0] }}</td>
-                    <td>{{ row[1] }}</td>
-                    <td>{{ row[2] }}</td>
-                    <td>{{ row[3] }}</td>
-                    <td>{{ row[4] }}</td>
-                    <td>{{ row[5] }}</td>
-                    <td>{{ row[6] }}</td>
-                    <td>{{ row[7] }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<script>
-        function openModal(tableId) {
-        var modal = document.getElementById("myModal");
-        var modalTitle = document.getElementById("modalTitle");
-        var lastShuffleTime = document.getElementById("lastShuffleTime");
-        var last2ShuffleTime = document.getElementById("last2ShuffleTime");
-        var modalRow = document.getElementById("modalRow");
-        var modalRow2 = document.getElementById("modalRow2");
-
-        modalTitle.textContent = tableId + "桌 詳細資料";
-        modal.style.display = "block";
-        modalRow.innerHTML = "";
-        modalRow2.innerHTML = "";
-
-        // AJAX 请求到后端获取数据
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/get_table_details", true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
-                var shuffleTime = response.last_shuffle_time;
-                var shuffleTime2 = response.second_last_shuffle_time;
-                var gameResults = response.game_results;
-                var gameResults2 = response.game_results2;
-
-                // 更新模态框数据
-                lastShuffleTime.textContent = shuffleTime;
-                last2ShuffleTime.textContent = shuffleTime2;
-
-                gameResults.forEach(function (result) {
-                    var total = result[0] + result[1] + result[2];
-                    var row = document.createElement("tr");
-                    var cell0 = document.createElement("td");
-                    cell0.textContent = result[0] + " (" + (total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0) + "%)";
-                    row.appendChild(cell0);
-                    var cell1 = document.createElement("td");
-                    cell1.textContent = result[1] + " (" + (total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0) + "%)";
-                    row.appendChild(cell1);
-                    var cell2 = document.createElement("td");
-                    cell2.textContent = result[2] + " (" + (total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0) + "%)";
-                    row.appendChild(cell2);
-                    for (var i = 3; i < result.length; i++) {
-                        var cell = document.createElement("td");
-                        cell.textContent = result[i];
-                        row.appendChild(cell);
-                    }
-                    modalRow.appendChild(row);
-                });
-
-                gameResults2.forEach(function (result) {
-                    var total = result[0] + result[1] + result[2];
-                    var row = document.createElement("tr");
-                    var cell0 = document.createElement("td");
-                    cell0.textContent = result[0] + " (" + (total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0) + "%)";
-                    row.appendChild(cell0);
-                    var cell1 = document.createElement("td");
-                    cell1.textContent = result[1] + " (" + (total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0) + "%)";
-                    row.appendChild(cell1);
-                    var cell2 = document.createElement("td");
-                    cell2.textContent = result[2] + " (" + (total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0) + "%)";
-                    row.appendChild(cell2);
-                    for (var i = 3; i < result.length; i++) {
-                        var cell = document.createElement("td");
-                        cell.textContent = result[i];
-                        row.appendChild(cell);
-                    }
-                    modalRow2.appendChild(row);
-                });
-            }
-        };
-        xhr.send(JSON.stringify({ table_id: tableId }));
-    }
-
-    document.getElementsByClassName("close")[0].onclick = function() {
-        document.getElementById("myModal").style.display = "none";
-    }
-
-    window.onclick = function(event) {
-        var modal = document.getElementById("myModal");
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-</script>
-
+    {% endif %}    
 </body>
 </html>
-    
