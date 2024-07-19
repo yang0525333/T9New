@@ -84,16 +84,16 @@
         {% set row1_total = 0 %}
         {% set row2_total = 0 %}
         {% set row3_total = 0 %}
-        {% for row in data %}
+        {% for row in data | sort(attribute='0') %}
             {% set row1_total = row1_total + row[1] %}
             {% set row2_total = row2_total + row[2] %}
-            {% set row3_total = row2_total + row[3] %}
-            {% set total = row1_total + row2_total + row_total%}
+            {% set row3_total = row3_total + row[3] %}
+            {% set total = row1_total + row2_total + row3_total %}
         <tr>
-            <td>{{ row[0] }}</td>
+            <td><button onclick="openModal('{{ row[0] }}')">{{ row[0] }}</button></td>
             <td>{{ row[1] }}{% if total > 0 %} ({{ "%.2f" % ((row[1] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
             <td>{{ row[2] }}{% if total > 0 %} ({{ "%.2f" % ((row[2] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
-            <td>{{ row[3] }}</td>
+            <td>{{ row[3] }}{% if total > 0 %} ({{ "%.2f" % ((row[3] / total) * 100) }}%) {% else %} (N/A) {% endif %}</td>
             <td>{{ row[4] }}</td>
             <td>{{ row[5] }}</td>
             <td>{{ row[6] }}</td>
