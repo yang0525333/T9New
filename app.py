@@ -96,7 +96,7 @@ def search_data():
             sum_lucky_six = sum(data[i][6] for i in range(len(data)))
             sum_player_pair = sum(data[i][7] for i in range(len(data)))
             sum_banker_pair = sum(data[i][8] for i in range(len(data)))
-            total = (sum_player_win,sum_banker_win,sum_tie_game,sum_any_pair,sum_perfect_pair,sum_lucky_six,sum_player_pair,sum_banker_pair)
+            total = ("所有桌總和",sum_player_win,sum_banker_win,sum_tie_game,sum_any_pair,sum_perfect_pair,sum_lucky_six,sum_player_pair,sum_banker_pair)
             data.insert(0 ,(total))
             print(data)
 
