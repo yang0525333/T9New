@@ -82,13 +82,14 @@
         {% set row1_total = 0 %}
         {% set row2_total = 0 %}
         {% set row3_total = 0 %}
+        {% set loop_index = 0 %}
         {% for row in data | sort(attribute='0') %}
             {% set row1_total = row1_total + row[1] %}
             {% set row2_total = row2_total + row[2] %}
             {% set row3_total = row3_total + row[3] %}
             {% set total = row1_total + row2_total + row3_total %}
             <tr>
-                {% if forloop.first %}
+                {% if loop_index == 0 %}
                     <td>{{ row[0] }}</td>
                 {% else %}
                     <td><button onclick="openModal('{{ row[0] }}')">{{ row[0] }}</button></td>
@@ -102,11 +103,12 @@
                 <td>{{ row[7] }}</td>
                 <td>{{ row[8] }}</td>
             </tr>
+            {% set loop_index = loop_index + 1 %}
         {% endfor %}
     </table>
     {% else %}
     <p>查無資料</p>
     {% endif %}
-    {% endif %}    
+    {% endif %}      
 </body>
 </html>
