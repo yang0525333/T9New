@@ -183,7 +183,7 @@ async def Synctime():
             await websocket_connection.send(json.dumps(SynctimeBody))
             Checksynctime += 1
             print(f"Send synctime success. {Checksynctime}")
-            if Checksynctime > 10 :
+            if Checksynctime > 2 :
                 print("No roundresult message over eight time , loop break 30 s")
                 await asyncio.sleep(30)
                 Checksynctime = 0
