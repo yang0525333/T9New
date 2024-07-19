@@ -296,6 +296,13 @@ async def receive_messages():
                 print("Receive message break")
                 break
         except :
+            login_data = None
+            db_pool = None
+            websocket_connection = None
+            DisconnectMessage = {
+                "OpCode" : "DisConnected"
+            }
+            await message_queue.put(DisconnectMessage)
             print("Receive message break")
             break
 
