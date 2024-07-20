@@ -1,4 +1,4 @@
-import asyncio , traceback
+import asyncio , traceback , gc
 import requests
 import websockets
 import json
@@ -40,6 +40,8 @@ async def release_db_connection(conn):
         db_pool.putconn(conn)
     except Error as e:
         print(f"Error releasing connection back to pool: {e}")
+    finally:
+        gc.collect()
 
 async def Message_handler():
     global websocket_connection , db_pool , login_data , Checksynctime
@@ -325,6 +327,8 @@ async def main():
 async def start():
     while True:
         try:
+            gc.collect()
+            print("gc.collect()")
             await main()
         except Exception as e:
             print("-------------Restart-------------")
