@@ -270,7 +270,6 @@ async def receive_messages():
                 message = await websocket_connection.recv()
                 try:
                     message_data = json.loads(message)
-                    print(message_data)
                     if message_data['OpCode'] == 'DisConnected':
                         await message_queue.put(message_data)
                         print("WebSocket disconnected.")
