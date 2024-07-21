@@ -388,7 +388,7 @@ async def CheckProbability():
             if BankerProbability < 41 :
                 message = '近一小時內每桌總和後莊家家勝率低於41%'
                 await LineNotify(message)
-            conn = get_db_connection()
+            conn = await get_db_connection()
             cursor = conn.cursor()
             cursor.execute('''
                 INSERT INTO history (fetch_time, player, banker ,tie)
