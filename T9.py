@@ -382,7 +382,7 @@ async def CheckProbability():
             PlayerProbability = (TotalPlayer / TotleGameRound) * 100
             BankerProbability = (TotalBanker / TotleGameRound) * 100
             TieProbability = (TotleTie / TotleGameRound) * 100
-            if PlayerProbability < 41 :
+            if PlayerProbability < 50 :
                 message = '近一小時內每桌總和後閒家勝率低於41%'
                 await LineNotify(message)
             if BankerProbability < 41 :
