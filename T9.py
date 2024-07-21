@@ -347,7 +347,7 @@ async def fetch_data(start_time,end_time):
         sum_banker_pair = sum(data[i][8] for i in range(len(data)))
         total = (0,sum_player_win,sum_banker_win,sum_tie_game,sum_any_pair,sum_perfect_pair,sum_lucky_six,sum_player_pair,sum_banker_pair)
         data.insert(0 ,(total))
-        await release_db_connection
+        await release_db_connection(conn)
         return data
     except :
         print("fetch data error")
