@@ -393,7 +393,7 @@ async def CheckProbability():
                 VALUES (%s, %s, %s ,%s)
             ''', (end_time , PlayerProbability , BankerProbability , TieProbability))
             conn.commit()
-            await release_db_connection()
+            await release_db_connection(conn)
         else :
             print("CheckProbability break")
             return True
