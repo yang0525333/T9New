@@ -70,7 +70,7 @@ def LineNotify(message):
     else:
         print(f'Failed to send notification: {response.status_code}')
 
-def CheckProbability():
+async def CheckProbability():
     try:
         end_time = datetime.now() - timedelta(hours=8)
         start_time = end_time - timedelta(hours=int(1))
@@ -102,4 +102,3 @@ def CheckProbability():
         print(f'Error during API call: {e}')
         return False
     
-CheckProbability()

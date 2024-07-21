@@ -2,9 +2,10 @@ import asyncio , traceback , gc
 import requests
 import websockets
 import json
-import datetime
+from datetime import datetime, timedelta
 import psycopg2
 from psycopg2 import Error, pool
+
 
 message_queue = asyncio.Queue()
 db_pool = None
@@ -127,7 +128,6 @@ async def Message_handler():
             print("Message break")
             break
             
-
 async def LoginGetToken():
     url = 'https://g.t9cn818.online/api/Lobby/login'
     headers = {
@@ -310,7 +310,112 @@ async def receive_messages():
             print("Receive message break")
             break
 
+async def fetch_data(start_time,end_time):
+    try :
+        conn = await get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            SELECT 
+                table_id,
+                COUNT(CASE WHEN player_win THEN 1 END) AS player_win_count,
+                COUNT(CASE WHEN banker_win THEN 1 END) AS banker_win_count,
+                COUNT(CASE WHEN tie_game THEN 1 END) AS tie_game_count,
+                COUNT(CASE WHEN any_pair THEN 1 END) AS any_pair_count,
+                COUNT(CASE WHEN perfect_pair THEN 1 END) AS perfect_pair_count,
+                COUNT(CASE WHEN lucky_six THEN 1 END) AS lucky_six_count,
+                COUNT(CASE WHEN player_pair THEN 1 END) AS player_pair_count,
+                COUNT(CASE WHEN banker_pair THEN 1 END) AS banker_pair_count
+            FROM 
+                game_result
+            WHERE 
+                game_date BETWEEN %s AND %s
+            GROUP BY 
+                table_id;
+        ''', (start_time, end_time))
 
+        data = cursor.fetchall()
+        conn.close()
+        sum_player_win = sum(data[i][1] for i in range(len(data)))
+        sum_banker_win = sum(data[i][2] for i in range(len(data)))
+        sum_tie_game = sum(data[i][3] for i in range(len(data)))
+        sum_any_pair = sum(data[i][4] for i in range(len(data)))
+        sum_perfect_pair = sum(data[i][5] for i in range(len(data)))
+        sum_lucky_six = sum(data[i][6] for i in range(len(data)))
+        sum_player_pair = sum(data[i][7] for i in range(len(data)))
+        sum_banker_pair = sum(data[i][8] for i in range(len(data)))
+        total = (0,sum_player_win,sum_banker_win,sum_tie_game,sum_any_pair,sum_perfect_pair,sum_lucky_six,sum_player_pair,sum_banker_pair)
+        data.insert(0 ,(total))
+        await release_db_connection
+        return data
+    except :
+        print("fetch data error")
+
+async def LineNotify(message):
+    own = 'geIsbH0HS5wIVG2vYO8mr207ZwRyhqgtRGtBAZkWQV4'
+    line_notify_token = 'bzc2iwQg5XyFjDcyitfAVkBc7fwapNDvKxUlzx2E7bO'
+    line_notify_api = 'https://notify-api.line.me/api/notify'
+    headers = {
+        'Authorization': f'Bearer {own}'
+    }
+    data = {
+        'message': message
+    }
+    response = requests.post(line_notify_api, headers=headers, data=data)
+    if response.status_code == 200:
+        print('Notification sent successfully!')
+    else:
+        print(f'Failed to send notification: {response.status_code}')
+
+async def CheckProbability():
+    try:
+        if websocket_connection.open :
+            end_time = datetime.now() - timedelta(hours=8)
+            start_time = end_time - timedelta(hours=int(1))
+            data = fetch_data(start_time = start_time,end_time = end_time)
+            print(data)
+            TotalPlayer = data[0][1]
+            TotalBanker = data[0][2]
+            TotleTie = data[0][3]
+            TotleGameRound = TotalPlayer + TotalBanker + TotleTie
+            PlayerProbability = (TotalPlayer / TotleGameRound) * 100
+            BankerProbability = (TotalBanker / TotleGameRound) * 100
+            TieProbability = (TotleTie / TotleGameRound) * 100
+            if PlayerProbability < 41 :
+                message = '近一小時內每桌總和後閒家勝率低於41%'
+                await LineNotify(message)
+            if BankerProbability < 41 :
+                message = '近一小時內每桌總和後莊家家勝率低於41%'
+                await LineNotify(message)
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute('''
+                INSERT INTO history (fetch_time, player, banker ,tie)
+                VALUES (%s, %s, %s ,%s)
+            ''', (end_time , PlayerProbability , BankerProbability , TieProbability))
+            conn.commit()
+            await release_db_connection()
+        else :
+            print("CheckProbability break")
+            return True
+    except Exception as e:
+        print("CheckProbability break")
+        return True
+    
+
+async def CheckProbabilityWorker(interval=15):
+    global websocket_connection , login_data , db_pool
+    while True:
+        try:
+            await asyncio.sleep(interval)
+            connectclose = await CheckProbability()
+            if connectclose == True:
+                print("CheckProbabilityWorker break")
+                break
+        except Exception as e:
+            print("CheckProbabilityWorker break")
+            break
+        
+    
 async def main():
     try:
         await init_db_pool()
@@ -318,11 +423,13 @@ async def main():
         await asyncio.gather(
             Message_handler(),
             periodic_sync(),
-            receive_messages()
+            receive_messages(),
+            CheckProbabilityWorker()
         )
     except Exception as e:
         print("Main loop restart")
         return
+    
 
 async def start():
     while True:
