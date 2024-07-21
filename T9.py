@@ -2,7 +2,7 @@ import asyncio , traceback , gc
 import requests
 import websockets
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta 
 import psycopg2
 from psycopg2 import Error, pool
 
@@ -59,7 +59,7 @@ async def Message_handler():
                     banker_cards = json.dumps(message['BankerCard'])
                     player_cards = json.dumps(message['PlayerCard'])
                     win_area = message['WinArea']
-                    game_date = datetime.datetime.now()
+                    game_date = datetime.now()
                     Player_Win = Banker_Win = Tie_Game = Any_Pair = Perfect_Pair = Lucky_Six = Player_Pair = Banker_Pair = False
 
                     for Winner in win_area:
@@ -96,7 +96,7 @@ async def Message_handler():
                             await release_db_connection(conn)
 
                 elif message['OpCode'] == 'Shuffle':
-                    Event_time = datetime.datetime.now()
+                    Event_time = datetime.now()
                     conn = await get_db_connection()
                     if conn:
                         try:
