@@ -371,7 +371,7 @@ async def CheckProbability():
         if websocket_connection.open :
             end_time = datetime.now() - timedelta(hours=8)
             start_time = end_time - timedelta(hours=int(1))
-            data = fetch_data(start_time = start_time,end_time = end_time)
+            data = await fetch_data(start_time = start_time,end_time = end_time)
             print(data)
             TotalPlayer = data[0][1]
             TotalBanker = data[0][2]
