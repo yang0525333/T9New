@@ -372,7 +372,7 @@ async def LineNotify(message):
 async def CheckProbability():
     try:
         if websocket_connection.open :
-            end_time = datetime.now() - timedelta(hours=8)
+            end_time = datetime.now()
             start_time = end_time - timedelta(hours=int(1))
             data = await fetch_data(start_time = start_time,end_time = end_time)
             print(data)
@@ -383,7 +383,7 @@ async def CheckProbability():
             PlayerProbability = (TotalPlayer / TotleGameRound) * 100
             BankerProbability = (TotalBanker / TotleGameRound) * 100
             TieProbability = (TotleTie / TotleGameRound) * 100
-            if PlayerProbability < 50 :
+            if PlayerProbability < 41 :
                 message = '近一小時內每桌總和後閒家勝率低於41%'
                 await LineNotify(message)
             if BankerProbability < 41 :
@@ -405,7 +405,7 @@ async def CheckProbability():
         return True
     
 
-async def CheckProbabilityWorker(interval=15):
+async def CheckProbabilityWorker(interval=60):
     while True:
         try:
             await asyncio.sleep(interval)
