@@ -403,7 +403,6 @@ async def CheckProbability():
     
 
 async def CheckProbabilityWorker(interval=15):
-    global websocket_connection , login_data , db_pool
     while True:
         try:
             await asyncio.sleep(interval)
