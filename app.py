@@ -25,65 +25,6 @@ def db_connect():
     )
     return conn
 
-def LineNotify(message):
-    own = 'geIsbH0HS5wIVG2vYO8mr207ZwRyhqgtRGtBAZkWQV4'
-    line_notify_token = 'bzc2iwQg5XyFjDcyitfAVkBc7fwapNDvKxUlzx2E7bO'
-    line_notify_api = 'https://notify-api.line.me/api/notify'
-    headers = {
-        'Authorization': f'Bearer {own}'
-    }
-    data = {
-        'message': message
-    }
-    response = requests.post(line_notify_api, headers=headers, data=data)
-    if response.status_code == 200:
-        print('Notification sent successfully!')
-    else:
-        print(f'Failed to send notification: {response.status_code}')
-
-def CheckProbability():
-    try:
-        end_time = datetime.now() - timedelta(hours=8)
-        start_time = end_time - timedelta(hours=int(1))
-        data = fetch_data(start_time = start_time,end_time = end_time)
-        print(data)
-        TotalPlayer = data[0][1]
-        TotalBanker = data[0][2]
-        TotleTie = data[0][3]
-        TotleGameRound = TotalPlayer + TotalBanker + TotleTie
-        PlayerProbability = (TotalPlayer / TotleGameRound) * 100
-        BankerProbability = (TotalBanker / TotleGameRound) * 100
-        TieProbability = (TotleTie / TotleGameRound) * 100
-        if PlayerProbability < 41 :
-            message = '近一小時內每桌總和後閒家勝率低於41%'
-            LineNotify(message)
-        if BankerProbability < 41 :
-            message = '近一小時內每桌總和後莊家家勝率低於41%'
-            LineNotify(message)
-        conn = db_connect()
-        cursor = conn.cursor()
-        cursor.execute('''
-            INSERT INTO history (fetch_time, player, banker ,tie)
-            VALUES (%s, %s, %s ,%s)
-        ''', (end_time , PlayerProbability , BankerProbability , TieProbability))
-        conn.commit()
-        conn.close()
-
-    except Exception as e:
-        print(f'Error during API call: {e}')
-        return False
-
-
-scheduler = BackgroundScheduler()
-scheduler.add_job(
-    func=CheckProbability,
-    trigger=IntervalTrigger(seconds=10),
-    id='send_scheduled_message_job',
-    name='Check the bet probability scheduled',
-    replace_existing=True
-)
-scheduler.start()
-
 
 def fetch_data(start_time,end_time):
     conn = db_connect()
