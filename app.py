@@ -30,7 +30,7 @@ def LineNotify(message):
     line_notify_token = 'bzc2iwQg5XyFjDcyitfAVkBc7fwapNDvKxUlzx2E7bO'
     line_notify_api = 'https://notify-api.line.me/api/notify'
     headers = {
-        'Authorization': f'Bearer {line_notify_token}'
+        'Authorization': f'Bearer {own}'
     }
     data = {
         'message': message
