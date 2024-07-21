@@ -54,7 +54,7 @@ def CheckProbability():
         PlayerProbability = (TotalPlayer / TotleGameRound) * 100
         BankerProbability = (TotalBanker / TotleGameRound) * 100
         TieProbability = (TotleTie / TotleGameRound) * 100
-        if PlayerProbability < 50 :
+        if PlayerProbability < 41 :
             message = '近一小時內每桌總和後閒家勝率低於41%'
             LineNotify(message)
         if BankerProbability < 41 :
