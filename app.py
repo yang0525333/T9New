@@ -26,7 +26,8 @@ def db_connect():
     return conn
 
 def LineNotify(message):
-    line_notify_token = 'ellfoqdzTmFSnGtPtbh4BIqEXoIr5U7P75t0LfcZfWU'
+    own = 'geIsbH0HS5wIVG2vYO8mr207ZwRyhqgtRGtBAZkWQV4'
+    line_notify_token = 'bzc2iwQg5XyFjDcyitfAVkBc7fwapNDvKxUlzx2E7bO'
     line_notify_api = 'https://notify-api.line.me/api/notify'
     headers = {
         'Authorization': f'Bearer {line_notify_token}'
@@ -42,7 +43,7 @@ def LineNotify(message):
 
 def CheckProbability():
     try:
-        end_time = datetime.now()
+        end_time = datetime.now() - timedelta(hours=8)
         start_time = end_time - timedelta(hours=int(1))
         data = fetch_data(start_time = start_time,end_time = end_time)
         print(data)
@@ -74,10 +75,9 @@ def CheckProbability():
 
 
 scheduler = BackgroundScheduler()
-message = 'test'
 scheduler.add_job(
     func=CheckProbability,
-    trigger=IntervalTrigger(seconds=3),
+    trigger=IntervalTrigger(seconds=10),
     id='send_scheduled_message_job',
     name='Check the bet probability scheduled',
     replace_existing=True
