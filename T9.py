@@ -124,6 +124,8 @@ async def Message_handler():
                 login_data = None
                 websocket_connection = None
                 break
+        except Exception as e:
+            print(f"Message handling error: {e}")
         except :
             print("Message break")
             break
