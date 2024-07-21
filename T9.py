@@ -399,12 +399,18 @@ async def CheckProbability():
     except Exception as e:
         print(f"Fetch data error {e}")
 
-async def CheckProbabilityWorker(interval=55):
+async def CheckProbabilityWorker(interval=5):
     while True:
         try:
-            await asyncio.sleep(5)
+            i = 0
+            while i < 13 :
+                if websocket_connection.open :
+                    await asyncio.sleep(interval)
+                    i += 1
+                else :
+                    print("CheckProbabilityWorker break")
+                    break
             if websocket_connection.open :
-                await asyncio.sleep(interval)
                 await CheckProbability()
             else :
                 print("CheckProbabilityWorker break")
