@@ -371,46 +371,42 @@ async def LineNotify(message):
 
 async def CheckProbability():
     try:
-        if websocket_connection.open :
-            end_time = datetime.now()
-            start_time = end_time - timedelta(hours=int(1))
-            data = await fetch_data(start_time = start_time,end_time = end_time)
-            print(data)
-            TotalPlayer = data[0][1]
-            TotalBanker = data[0][2]
-            TotleTie = data[0][3]
-            TotleGameRound = TotalPlayer + TotalBanker + TotleTie
-            PlayerProbability = (TotalPlayer / TotleGameRound) * 100
-            BankerProbability = (TotalBanker / TotleGameRound) * 100
-            TieProbability = (TotleTie / TotleGameRound) * 100
-            if PlayerProbability < 41 :
-                message = '近一小時內每桌總和後閒家勝率低於41%'
-                await LineNotify(message)
-            if BankerProbability < 41 :
-                message = '近一小時內每桌總和後莊家家勝率低於41%'
-                await LineNotify(message)
-            conn = await get_db_connection()
-            cursor = conn.cursor()
-            cursor.execute('''
-                INSERT INTO history (fetch_time, player, banker ,tie)
-                VALUES (%s, %s, %s ,%s)
-            ''', (end_time , PlayerProbability , BankerProbability , TieProbability))
-            conn.commit()
-            await release_db_connection(conn)
-        else :
-            print("CheckProbability break")
-            return True
+        end_time = datetime.now()
+        start_time = end_time - timedelta(hours=int(1))
+        data = await fetch_data(start_time = start_time,end_time = end_time)
+        print(data)
+        TotalPlayer = data[0][1]
+        TotalBanker = data[0][2]
+        TotleTie = data[0][3]
+        TotleGameRound = TotalPlayer + TotalBanker + TotleTie
+        PlayerProbability = (TotalPlayer / TotleGameRound) * 100
+        BankerProbability = (TotalBanker / TotleGameRound) * 100
+        TieProbability = (TotleTie / TotleGameRound) * 100
+        if PlayerProbability < 41 :
+            message = '近一小時內每桌總和後閒家勝率低於41%'
+            await LineNotify(message)
+        if BankerProbability < 41 :
+            message = '近一小時內每桌總和後莊家家勝率低於41%'
+            await LineNotify(message)
+        conn = await get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute('''
+            INSERT INTO history (fetch_time, player, banker ,tie)
+            VALUES (%s, %s, %s ,%s)
+        ''', (end_time , PlayerProbability , BankerProbability , TieProbability))
+        conn.commit()
+        await release_db_connection(conn)
     except Exception as e:
-        print("CheckProbability break")
-        return True
-    
+        print(f"Fetch data error {e}")
 
-async def CheckProbabilityWorker(interval=60):
+async def CheckProbabilityWorker(interval=55):
     while True:
         try:
-            await asyncio.sleep(interval)
-            connectclose = await CheckProbability()
-            if connectclose == True:
+            await asyncio.sleep(5)
+            if websocket_connection.open :
+                await asyncio.sleep(interval)
+                await CheckProbability()
+            else :
                 print("CheckProbabilityWorker break")
                 break
         except Exception as e:
