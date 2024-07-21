@@ -383,10 +383,10 @@ async def CheckProbability():
         BankerProbability = (TotalBanker / TotleGameRound) * 100
         TieProbability = (TotleTie / TotleGameRound) * 100
         if PlayerProbability < 50 :
-            message = '近一小時內每桌總和後"閒家"勝率低於41% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
+            message = f'近一小時內每桌總和後"閒家"勝率僅剩{round(PlayerProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
-        if BankerProbability < 41 :
-            message = '近一小時內每桌總和後"莊家"家勝率低於41% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
+        if BankerProbability < 50 :
+            message = f'近一小時內每桌總和後"莊家"家勝率僅剩{round(BankerProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
         conn = await get_db_connection()
         cursor = conn.cursor()
