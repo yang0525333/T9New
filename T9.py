@@ -126,6 +126,7 @@ async def Message_handler():
                 break
         except Exception as e:
             print(f"Message handling error: {e}")
+            break
         except :
             print("Message break")
             break
