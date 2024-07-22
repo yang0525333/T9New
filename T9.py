@@ -437,8 +437,12 @@ async def main():
     
 
 async def start():
+    global login_data , db_pool , websocket_connection
     while True:
         try:
+            login_data = None
+            db_pool = None
+            websocket_connection = None
             gc.collect()
             print("gc.collect()")
             await main()
