@@ -205,7 +205,72 @@ def get_table_details():
     except Exception as e:
         print(f"Unexpected error: {e}")
         return jsonify({'error': 'An unexpected error occurred.'}), 500
-        
+    
+@app.route("/new_search", methods=["GET", "POST"])
+def new_search():
+    start_time = None
+    end_time = None
+    new_search_results = []
+
+    if request.method == 'POST':
+        if 'quick_search' in request.form:
+            if 'time_amount' in request.form and 'time_unit' in request.form:
+                time_amount = request.form['time_amount']
+                time_unit = request.form['time_unit']
+                start_time, end_time = calculate_time_range(time_amount, time_unit)
+            else:
+                start_time = datetime.now() - timedelta(days=1) 
+                end_time = datetime.now()
+        else:
+            start_time = request.form['start_time']
+            end_time = request.form['end_time']
+            if isinstance(start_time, str):
+                try:
+                    start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
+                except ValueError:
+                    start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
+                start_time -= timedelta(hours=8) 
+
+            if isinstance(end_time, str):
+                try:
+                    end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S')
+                except ValueError:
+                    end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
+                end_time -= timedelta(hours=8) 
+
+        print(start_time)
+        print(end_time)
+
+        try:
+            conn = db_connect()
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT 
+                    fetch_time,
+                    player,
+                    banker,
+                    tie
+                FROM history
+                WHERE fetch_time BETWEEN %s AND %s
+            ''', (start_time, end_time))
+            raw_results = cursor.fetchall()
+            
+            # Format the results
+            new_search_results = []
+            for row in raw_results:
+                fetch_time = row[0].strftime('%Y-%m-%d %H:%M:%S')  # Format to second
+                player_prob = f"{row[1]:.2f}%"
+                banker_prob = f"{row[2]:.2f}%"
+                tie_prob = f"{row[3]:.2f}%"
+                new_search_results.append((fetch_time, player_prob, banker_prob, tie_prob))
+                
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        finally:
+            cursor.close()
+            conn.close()
+
+    return render_template("new_search.html", show_new_search_results=True, new_search_results=new_search_results)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8888)))

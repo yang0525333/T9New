@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Search Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1 {
+            text-align: left;
+        }
+        form {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        form label {
+            margin-right: 10px;
+        }
+        form input[type="datetime-local"],
+        form input[type="submit"] {
+            margin-right: 10px;
+            font-size: 14px;
+            padding: 6px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>歷史機率搜尋</h1>
+    <form action="/new_search" method="post">
+        <label for="start_time">開始時間:</label>
+        <input type="datetime-local" id="start_time" name="start_time" value="{{ start_time }}" required>
+        
+        <label for="end_time">結束時間:</label>
+        <input type="datetime-local" id="end_time" name="end_time" value="{{ end_time }}" required>
+        
+        <input type="submit" value="開始搜尋">
+    </form>
+    <form action="/new_search" method="post">
+        <label>近 <input type="number" id="time_amount" name="time_amount" min="1" max="30" style="width: 50px; height: 25px;" placeholder="數量" value="{{ time_amount }}"> </label>
+        <select id="time_unit" name="time_unit" style="width: 60px; height: 30px;" >
+            <option value="hour" {% if time_unit == "hour" %}selected{% endif %} >小時</option>
+            <option value="day" {% if time_unit == "day" %}selected{% endif %} >日</option>
+        </select>
+        <input type="submit" name="quick_search" value="快速搜尋">
+    </form>
+
+    {% if show_new_search_results %}
+    <h2>歷史機率查詢結果</h2>
+    <table>
+        <tr>
+            <th>時間</th>
+            <th>閒家機率</th>
+            <th>莊家機率</th>
+            <th>和局機率</th>
+        </tr>
+        {% for row in new_search_results %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}%</td>
+            <td>{{ row[2] }}%</td>
+            <td>{{ row[3] }}%</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+</body>
+</html>
