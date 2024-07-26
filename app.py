@@ -263,6 +263,7 @@ def new_search():
                 banker_prob = f"{row[2]:.2f}%"
                 tie_prob = f"{row[3]:.2f}%"
                 new_search_results.append((fetch_time, player_prob, banker_prob, tie_prob))
+            new_search_results.sort(key=lambda x: x[0], reverse=True)
                 
         except Exception as e:
             print(f"An error occurred: {e}")
