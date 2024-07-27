@@ -218,6 +218,8 @@ def new_search():
                 time_amount = request.form['time_amount']
                 time_unit = request.form['time_unit']
                 start_time, end_time = calculate_time_range(time_amount, time_unit)
+                start_time += timedelta(hours=8)
+                end_time += timedelta(hours=8)
             else:
                 start_time = datetime.now() - timedelta(days=1) 
                 end_time = datetime.now()
@@ -229,14 +231,14 @@ def new_search():
                     start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%S')
                 except ValueError:
                     start_time = datetime.strptime(start_time, '%Y-%m-%dT%H:%M')
-                start_time -= timedelta(hours=8) 
+                
 
             if isinstance(end_time, str):
                 try:
                     end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%S')
                 except ValueError:
                     end_time = datetime.strptime(end_time, '%Y-%m-%dT%H:%M')
-                end_time -= timedelta(hours=8) 
+                
 
         print(start_time)
         print(end_time)
