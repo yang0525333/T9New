@@ -404,7 +404,7 @@ async def CheckProbabilityWorker(interval=5):
     while True:
         try:
             i = 0
-            while i < 12 :
+            while i < 60 :
                 if websocket_connection.open :
                     await asyncio.sleep(interval)
                     i += 1
