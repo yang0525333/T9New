@@ -394,7 +394,7 @@ async def CheckProbability():
         cursor.execute('''
             INSERT INTO history (fetch_time, player, banker ,tie)
             VALUES (%s, %s, %s ,%s)
-        ''', (end_time , PlayerProbability , BankerProbability , TieProbability))
+        ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability))
         conn.commit()
         await release_db_connection(conn)
     except Exception as e:
@@ -404,7 +404,7 @@ async def CheckProbabilityWorker(interval=5):
     while True:
         try:
             i = 0
-            while i < 13 :
+            while i < 12 :
                 if websocket_connection.open :
                     await asyncio.sleep(interval)
                     i += 1
