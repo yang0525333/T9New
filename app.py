@@ -251,7 +251,12 @@ def new_search():
                     fetch_time,
                     player,
                     banker,
-                    tie
+                    tie,
+                    any_pair,
+                    perfect_pair,
+                    lucky_six,
+                    player_pair,
+                    banker_pair
                 FROM history
                 WHERE fetch_time BETWEEN %s AND %s
             ''', (start_time, end_time))
@@ -264,7 +269,12 @@ def new_search():
                 player_prob = f"{row[1]:.2f}%"
                 banker_prob = f"{row[2]:.2f}%"
                 tie_prob = f"{row[3]:.2f}%"
-                new_search_results.append((fetch_time, player_prob, banker_prob, tie_prob))
+                any_pair_prob = f"{row[4]:.2f}%"
+                perfect_pair_prob = f"{row[5]:.2f}%"
+                lucky_six_prob = f"{row[6]:.2f}%"
+                player_pair_prob = f"{row[7]:.2f}%"
+                banker_pair_prob = f"{row[8]:.2f}%"
+                new_search_results.append((fetch_time, player_prob, banker_prob, tie_prob, any_pair_prob, perfect_pair_prob, lucky_six_prob, player_pair_prob, banker_pair_prob))
             new_search_results.sort(key=lambda x: x[0], reverse=True)
                 
         except Exception as e:

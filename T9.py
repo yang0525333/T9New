@@ -61,7 +61,6 @@ async def Message_handler():
                     win_area = message['WinArea']
                     game_date = datetime.now()
                     Player_Win = Banker_Win = Tie_Game = Any_Pair = Perfect_Pair = Lucky_Six = Player_Pair = Banker_Pair = False
-
                     for Winner in win_area:
                         if Winner == 0:
                             Banker_Win = True
@@ -378,11 +377,21 @@ async def CheckProbability():
         print(data)
         TotalPlayer = data[0][1]
         TotalBanker = data[0][2]
-        TotleTie = data[0][3]
-        TotleGameRound = TotalPlayer + TotalBanker + TotleTie
+        TotalTie = data[0][3]
+        TotalAnypair = data[0][4]
+        TotalPerfectpair = data[0][5]
+        TotalLuckySix = data[0][6]
+        TotalPlayerpair = data[0][7]
+        TotalBankerpair = data[0][8]
+        TotleGameRound = TotalPlayer + TotalBanker + TotalTie
         PlayerProbability = (TotalPlayer / TotleGameRound) * 100
         BankerProbability = (TotalBanker / TotleGameRound) * 100
-        TieProbability = (TotleTie / TotleGameRound) * 100
+        TieProbability = (TotalTie / TotleGameRound) * 100
+        AnypairProbability = (TotalAnypair / TotleGameRound) * 100
+        PerfectpairProbability = (TotalPerfectpair / TotleGameRound) * 100
+        LuckySixProbability = (TotalLuckySix / TotleGameRound) * 100
+        PlayerpairProbability = (TotalPlayerpair / TotleGameRound) * 100
+        BankerpairProbability = (TotalBankerpair / TotleGameRound) * 100
         if PlayerProbability < 41 :
             message = f'近一小時內每桌總和後"閒家"勝率僅剩{round(PlayerProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
@@ -392,9 +401,9 @@ async def CheckProbability():
         conn = await get_db_connection()
         cursor = conn.cursor()
         cursor.execute('''
-            INSERT INTO history (fetch_time, player, banker ,tie)
-            VALUES (%s, %s, %s ,%s)
-        ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability))
+            INSERT INTO history (fetch_time, player, banker ,tie , any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
+            VALUES (%s, %s, %s ,%s ,%s, %s, %s, %s, %s)
+        ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability , AnypairProbability , PerfectpairProbability , LuckySixProbability , PlayerpairProbability , BankerpairProbability))
         conn.commit()
         await release_db_connection(conn)
     except Exception as e:

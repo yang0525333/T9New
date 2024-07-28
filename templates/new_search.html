@@ -66,6 +66,11 @@
             <th>閒家機率</th>
             <th>莊家機率</th>
             <th>和局機率</th>
+            <th>任意對子</th>
+            <th>完美對子</th>
+            <th>幸運六</th>
+            <th>閒家對子</th>
+            <th>莊家對子</th>
         </tr>
         {% for row in new_search_results %}
         <tr>
@@ -73,6 +78,12 @@
             <td>{{ row[1] }}%</td>
             <td>{{ row[2] }}%</td>
             <td>{{ row[3] }}%</td>
+            <td>{{ row[4] }}%</td>
+            <td>{{ row[5] }}%</td>
+            <td>{{ row[6] }}%</td>
+            <td>{{ row[7] }}%</td>
+            <td>{{ row[8] }}%</td>
+            <td>{{ row[9] }}%</td>
         </tr>
         {% endfor %}
     </table>
