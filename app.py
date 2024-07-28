@@ -266,17 +266,18 @@ def new_search():
             new_search_results = []
             for row in raw_results:
                 fetch_time = row[0].strftime('%Y-%m-%d %H:%M:%S')  # Format to second
-                player_prob = f"{row[1]:.2f}%"
-                banker_prob = f"{row[2]:.2f}%"
-                tie_prob = f"{row[3]:.2f}%"
-                any_pair_prob = f"{row[4]:.2f}%"
-                perfect_pair_prob = f"{row[5]:.2f}%"
-                lucky_six_prob = f"{row[6]:.2f}%"
-                player_pair_prob = f"{row[7]:.2f}%"
-                banker_pair_prob = f"{row[8]:.2f}%"
+                player_prob = f"{row[1]:.2f}%" if row[1] is not None else "N/A"
+                banker_prob = f"{row[2]:.2f}%" if row[2] is not None else "N/A"
+                tie_prob = f"{row[3]:.2f}%" if row[3] is not None else "N/A"
+                any_pair_prob = f"{row[4]:.2f}%" if row[4] is not None else "N/A"
+                perfect_pair_prob = f"{row[5]:.2f}%" if row[5] is not None else "N/A"
+                lucky_six_prob = f"{row[6]:.2f}%" if row[6] is not None else "N/A"
+                player_pair_prob = f"{row[7]:.2f}%" if row[7] is not None else "N/A"
+                banker_pair_prob = f"{row[8]:.2f}%" if row[8] is not None else "N/A"
+
                 new_search_results.append((fetch_time, player_prob, banker_prob, tie_prob, any_pair_prob, perfect_pair_prob, lucky_six_prob, player_pair_prob, banker_pair_prob))
+    
             new_search_results.sort(key=lambda x: x[0], reverse=True)
-                
         except Exception as e:
             print(f"An error occurred: {e}")
         finally:
