@@ -3,13 +3,13 @@
 # Heroku app name
 APP_NAME="t9live"
 
-# Heroku API key (to be set as an environment variable in Heroku)
 HEROKU_API_KEY=$HEROKU_API_KEY
 
-# Set Heroku CLI authentication
-echo "machine api.heroku.com
-  login $HEROKU_API_KEY
-  password $HEROKU_API_KEY" > ~/.netrc
+# Heroku API URL
+HEROKU_API_URL="https://api.heroku.com/apps/$APP_NAME/dynos"
 
 # Restart the Heroku app
-heroku restart --app $APP_NAME
+curl -n -X DELETE $HEROKU_API_URL \
+-H "Content-Type: application/json" \
+-H "Accept: application/vnd.heroku+json; version=3" \
+-H "Authorization: Bearer $HEROKU_API_KEY"
