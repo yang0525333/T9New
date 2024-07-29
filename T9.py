@@ -372,7 +372,7 @@ async def LineNotify(message):
 async def CheckProbability():
     try:
         end_time = datetime.now()
-        start_time = end_time - timedelta(hours=int(1))
+        start_time = end_time - timedelta(minutes=int(5))
         data = await fetch_data(start_time = start_time,end_time = end_time)
         print(data)
         TotalPlayer = data[0][1]
@@ -413,7 +413,7 @@ async def CheckProbabilityWorker(interval=5):
     while True:
         try:
             i = 0
-            while i < 60 :
+            while i < 12 :
                 if websocket_connection.open :
                     await asyncio.sleep(interval)
                     i += 1
