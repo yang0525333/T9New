@@ -392,10 +392,10 @@ async def CheckProbability():
         LuckySixProbability = (TotalLuckySix / TotleGameRound) * 100
         PlayerpairProbability = (TotalPlayerpair / TotleGameRound) * 100
         BankerpairProbability = (TotalBankerpair / TotleGameRound) * 100
-        if PlayerpairProbability < 41 :
+        if PlayerpairProbability < 4 :
             message = f'近5分鐘內每桌總和後"閒對"勝率僅剩{round(PlayerpairProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
-        if BankerpairProbability < 41 :
+        if BankerpairProbability < 4 :
             message = f'近5分鐘內每桌總和後"莊對"家勝率僅剩{round(BankerpairProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
         conn = await get_db_connection()
