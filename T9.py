@@ -104,6 +104,10 @@ async def Message_handler():
                                 INSERT INTO event (event_type, table_id, event_time)
                                 VALUES (%s, %s, %s)
                             ''', (message['OpCode'], message['TableId'], Event_time))
+                            cursor.execute('''
+                                INSERT INTO poker_record (TableId, , Shuffle_time)
+                                VALUES (%s, %s)
+                            ''', (message['TableId'], Event_time))
                             conn.commit()
                             print(f"Inserted Shuffle record into database for Table {message['TableId']}")
                         except Error as e:
