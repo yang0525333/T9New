@@ -88,29 +88,31 @@ async def Message_handler():
                                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                             ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
                             for Card in message['BankerCard']:
-                                query = f'''
-                                    UPDATE poker_record
-                                    SET "{Card}" = "{Card}" - 1
-                                    WHERE tableid = {Table_id}
-                                    AND shuffle_time = (
-                                        SELECT MAX(shuffle_time)
-                                        FROM poker_record
+                                if Card != 0 :
+                                    query = f'''
+                                        UPDATE poker_record
+                                        SET "{Card}" = "{Card}" - 1
                                         WHERE tableid = {Table_id}
-                                    )
-                                '''
-                            cursor.execute(query)
+                                        AND shuffle_time = (
+                                            SELECT MAX(shuffle_time)
+                                            FROM poker_record
+                                            WHERE tableid = {Table_id}
+                                        )
+                                    '''
+                                    cursor.execute(query)
                             for Card in message['PlayerCard']:
-                                query = f'''
-                                    UPDATE poker_record
-                                    SET "{Card}" = "{Card}" - 1
-                                    WHERE tableid = {Table_id}
-                                    AND shuffle_time = (
-                                        SELECT MAX(shuffle_time)
-                                        FROM poker_record
+                                if Card != 0 :
+                                    query = f'''
+                                        UPDATE poker_record
+                                        SET "{Card}" = "{Card}" - 1
                                         WHERE tableid = {Table_id}
-                                    )
-                                '''
-                            cursor.execute(query)
+                                        AND shuffle_time = (
+                                            SELECT MAX(shuffle_time)
+                                            FROM poker_record
+                                            WHERE tableid = {Table_id}
+                                        )
+                                    '''
+                                    cursor.execute(query)
                             conn.commit()
                             print(f"RoundResult Table: {Table_id}")
                         except Error as e:
