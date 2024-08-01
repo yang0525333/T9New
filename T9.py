@@ -87,6 +87,30 @@ async def Message_handler():
                                 INSERT INTO game_result (table_id, game_date, banker_points, player_points, banker_card, player_card, player_win, banker_win, tie_game, any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
                                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                             ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
+                            for Card in banker_cards:
+                                query = f'''
+                                    UPDATE poker_record
+                                    SET "{Card}" = "{Card}" - 1
+                                    WHERE tableid = {Table_id}
+                                    AND shuffle_time = (
+                                        SELECT MAX(shuffle_time)
+                                        FROM poker_record
+                                        WHERE tableid = {Table_id}
+                                    )
+                                '''
+                            cursor.execute(query)
+                            for Card in player_cards:
+                                query = f'''
+                                    UPDATE poker_record
+                                    SET "{Card}" = "{Card}" - 1
+                                    WHERE tableid = {Table_id}
+                                    AND shuffle_time = (
+                                        SELECT MAX(shuffle_time)
+                                        FROM poker_record
+                                        WHERE tableid = {Table_id}
+                                    )
+                                '''
+                            cursor.execute(query)
                             conn.commit()
                             print(f"RoundResult Table: {Table_id}")
                         except Error as e:
