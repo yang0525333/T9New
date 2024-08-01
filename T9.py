@@ -87,7 +87,7 @@ async def Message_handler():
                                 INSERT INTO game_result (table_id, game_date, banker_points, player_points, banker_card, player_card, player_win, banker_win, tie_game, any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
                                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
                             ''', (Table_id, game_date, banker_points, player_points, banker_cards, player_cards, Player_Win, Banker_Win, Tie_Game, Any_Pair, Perfect_Pair, Lucky_Six, Player_Pair, Banker_Pair))
-                            for Card in banker_cards:
+                            for Card in message['BankerCard']:
                                 query = f'''
                                     UPDATE poker_record
                                     SET "{Card}" = "{Card}" - 1
@@ -99,7 +99,7 @@ async def Message_handler():
                                     )
                                 '''
                             cursor.execute(query)
-                            for Card in player_cards:
+                            for Card in message['PlayerCard']:
                                 query = f'''
                                     UPDATE poker_record
                                     SET "{Card}" = "{Card}" - 1
