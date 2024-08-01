@@ -105,7 +105,7 @@ async def Message_handler():
                                 VALUES (%s, %s, %s)
                             ''', (message['OpCode'], message['TableId'], Event_time))
                             cursor.execute('''
-                                INSERT INTO poker_record (TableId, , Shuffle_time)
+                                INSERT INTO poker_record (TableId, Shuffle_time)
                                 VALUES (%s, %s)
                             ''', (message['TableId'], Event_time))
                             conn.commit()
