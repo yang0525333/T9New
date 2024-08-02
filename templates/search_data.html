@@ -267,12 +267,13 @@
             var modalRow = document.getElementById("modalRow");
             var modalRow2 = document.getElementById("modalRow2");
             var remainTable = document.getElementById("remainTable");
-
+    
             modalTitle.textContent = tableId + "桌 詳細資料";
             modal.style.display = "block";
             modalRow.innerHTML = "";
             modalRow2.innerHTML = "";
-
+            remainTable.innerHTML = "";
+    
             // AJAX 请求到后端获取数据
             var xhr = new XMLHttpRequest();
             xhr.open("POST", "/get_table_details", true);
@@ -285,72 +286,46 @@
                     var gameResults = response.game_results;
                     var gameResults2 = response.game_results2;
                     var remaining_cards = response.remaining_cards;
-
+    
                     // 更新模态框数据
                     lastShuffleTime.textContent = shuffleTime;
                     last2ShuffleTime.textContent = shuffleTime2;
-
+    
                     gameResults.forEach(function (result) {
                         var total = result[0] + result[1] + result[2];
                         var row = document.createElement("tr");
-                        var cell0 = document.createElement("td");
-                        cell0.textContent = result[0] + " (" + (total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0) + "%)";
-                        row.appendChild(cell0);
-                        var cell1 = document.createElement("td");
-                        cell1.textContent = result[1] + " (" + (total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0) + "%)";
-                        row.appendChild(cell1);
-                        var cell2 = document.createElement("td");
-                        cell2.textContent = result[2] + " (" + (total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0) + "%)";
-                        row.appendChild(cell2);
-                        for (var i = 3; i < result.length; i++) {
-                            var cell = document.createElement("td");
-                            cell.textContent = result[i];
-                            row.appendChild(cell);
-                        }
+                        row.innerHTML = `<td>${result[0]} (${total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0}%)</td>
+                                         <td>${result[1]} (${total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0}%)</td>
+                                         <td>${result[2]} (${total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0}%)</td>
+                                         ${result.slice(3).map(val => `<td>${val}</td>`).join('')}`;
                         modalRow.appendChild(row);
                     });
-
+    
                     gameResults2.forEach(function (result) {
                         var total = result[0] + result[1] + result[2];
                         var row = document.createElement("tr");
-                        var cell0 = document.createElement("td");
-                        cell0.textContent = result[0] + " (" + (total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0) + "%)";
-                        row.appendChild(cell0);
-                        var cell1 = document.createElement("td");
-                        cell1.textContent = result[1] + " (" + (total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0) + "%)";
-                        row.appendChild(cell1);
-                        var cell2 = document.createElement("td");
-                        cell2.textContent = result[2] + " (" + (total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0) + "%)";
-                        row.appendChild(cell2);
-                        for (var i = 3; i < result.length; i++) {
-                            var cell = document.createElement("td");
-                            cell.textContent = result[i];
-                            row.appendChild(cell);
-                        }
+                        row.innerHTML = `<td>${result[0]} (${total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0}%)</td>
+                                         <td>${result[1]} (${total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0}%)</td>
+                                         <td>${result[2]} (${total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0}%)</td>
+                                         ${result.slice(3).map(val => `<td>${val}</td>`).join('')}`;
                         modalRow2.appendChild(row);
                     });
-                    var remainTable = document.querySelector("table tbody");
-                    remainTable.innerHTML = "";
+    
                     for (var i = 0; i < 4; i++) {
                         var row = document.createElement("tr");
-                        var cellIndex = document.createElement("td");
-                        cellIndex.textContent = i + 1;
-                        row.appendChild(cellIndex);
-                        for (var j = 0; j < 13; j++) {
-                            var cell = document.createElement("td");
-                            cell.textContent = remaining_cards[i * 13 + j];
-                            row.appendChild(cell);
-                        }
+                        row.innerHTML = `<td>${i + 1}</td>
+                                         ${remaining_cards.slice(i * 13, (i + 1) * 13).map(card => `<td>${card || 'N/A'}</td>`).join('')}`;
                         remainTable.appendChild(row);
+                    }
                 }
             };
             xhr.send(JSON.stringify({ table_id: tableId }));
         }
-
+    
         document.getElementsByClassName("close")[0].onclick = function() {
             document.getElementById("myModal").style.display = "none";
         }
-
+    
         window.onclick = function(event) {
             var modal = document.getElementById("myModal");
             if (event.target == modal) {
@@ -358,6 +333,4 @@
             }
         }
     </script>
-
-</body>
-</html>
+    
