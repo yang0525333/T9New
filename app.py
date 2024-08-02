@@ -186,6 +186,16 @@ def get_table_details():
             game_results2 = cursor.fetchall()
         else:
             game_results = []
+
+        cursor.execute('''
+        SELECT *
+        FROM Poker_record
+        WHERE Tableid = %s
+        ORDER BY Shuffle_time DESC
+        LIMIT 1;
+        ''', (table_id,))
+        remaining_cards = cursor.fetchall()
+        print(remaining_cards)
         conn.close()
         if last_shuffle_time:
             last_shuffle_time = (last_shuffle_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
@@ -196,7 +206,8 @@ def get_table_details():
             'last_shuffle_time': last_shuffle_time,
             'second_last_shuffle_time' : second_last_shuffle_time,
             'game_results': game_results,
-            'game_results2' : game_results2
+            'game_results2' : game_results2,
+            'remaining_cards' : remaining_cards
         })
 
     except psycopg2.Error as e:
