@@ -206,6 +206,8 @@ def get_table_details():
             remaining_cards2 = []
             remaining_cards3 = []
             remaining_cards4 = []
+            remaining_cards = []
+            remaining_cards_Total = []
 
             for i in range(len(remaining_cards_db[0])) :
                 if 2 < i < 16:
@@ -216,16 +218,24 @@ def get_table_details():
                     remaining_cards3.append(remaining_cards_db[0][i])
                 elif 41 < i < 55:
                     remaining_cards4.append(remaining_cards_db[0][i])
+            remaining_cards.append(tuple(remaining_cards1))
+            remaining_cards.append(tuple(remaining_cards2))
+            remaining_cards.append(tuple(remaining_cards3))
+            remaining_cards.append(tuple(remaining_cards4))
+            for j in range(13):
+                Total_Card = 0
+                for i in range(len(remaining_cards)):
+                    Total_Card += remaining_cards[i][j]
+                remaining_cards_Total.append(Total_Card)
+            remaining_cards.append(tuple(remaining_cards_Total))
 
             return jsonify({
                 'last_shuffle_time': last_shuffle_time,
                 'second_last_shuffle_time' : second_last_shuffle_time,
                 'game_results': game_results,
                 'game_results2' : game_results2,
-                'remaining_cards1' : remaining_cards1,
-                'remaining_cards2' : remaining_cards2,
-                'remaining_cards3' : remaining_cards3,
-                "remaining_cards4" : remaining_cards4
+                'remaining_cards' : remaining_cards,
+
             })
 
         except psycopg2.Error as e:
