@@ -220,7 +220,7 @@
                     <tr>
                         <td>{{ i + 1 }}</td>
                         {% for j in range(13) %}
-                        <td>{{ remaining_cards[i * 13 + j] }}</td>
+                        <td>{{ remaining_cards[i * 13 + j] | default('N/A') }}</td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
