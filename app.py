@@ -206,15 +206,20 @@ def get_table_details():
             remaining_cards2 = []
             remaining_cards3 = []
             remaining_cards4 = []
-            for i in range(len(remaining_cards_db[0])) :
+
+            for i in range(len(remaining_cards_db[0])):
+                try:
+                    value = int(remaining_cards_db[0][i])
+                except ValueError:
+                    continue 
                 if 2 < i < 16:
-                    remaining_cards1.append(remaining_cards_db[0][i])
+                    remaining_cards1.append(value)
                 elif 15 < i < 29:
-                    remaining_cards2.append(remaining_cards_db[0][i])
+                    remaining_cards2.append(value)
                 elif 28 < i < 42:
-                    remaining_cards3.append(remaining_cards_db[0][i])
+                    remaining_cards3.append(value)
                 elif 41 < i < 55:
-                    remaining_cards4.append(remaining_cards_db[0][i])
+                    remaining_cards4.append(value)
 
             print(remaining_cards1)
             print(remaining_cards2)
