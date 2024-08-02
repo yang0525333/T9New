@@ -299,23 +299,6 @@
                     var remaining_cards2 = response.remaining_cards2;
                     var remaining_cards3 = response.remaining_cards3;
                     var remaining_cards4 = response.remaining_cards4;
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    console.log(remaining_cards4)
-                    
-
 
                     // 更新模态框数据
                     lastShuffleTime.textContent = shuffleTime;
@@ -363,36 +346,6 @@
                     remaining_cards1.forEach(function (result) {
                         var row = document.createElement("tr");
                         for (var i = 1; i < result.length; i++) {
-                            var cell = document.createElement("td");
-                            cell.textContent = result[i];
-                            row.appendChild(cell);
-                        }
-                        RemainRow.appendChild(row);
-                    });
-
-                    remaining_cards2.forEach(function (result) {
-                        var row = document.createElement("tr");
-                        for (var i = 0; i < result.length; i++) {
-                            var cell = document.createElement("td");
-                            cell.textContent = result[i];
-                            row.appendChild(cell);
-                        }
-                        RemainRow.appendChild(row);
-                    });
-
-                    remaining_cards3.forEach(function (result) {
-                        var row = document.createElement("tr");
-                        for (var i = 0; i < result.length; i++) {
-                            var cell = document.createElement("td");
-                            cell.textContent = result[i];
-                            row.appendChild(cell);
-                        }
-                        RemainRow.appendChild(row);
-                    });
-
-                    remaining_cards4.forEach(function (result) {
-                        var row = document.createElement("tr");
-                        for (var i = 0; i < result.length; i++) {
                             var cell = document.createElement("td");
                             cell.textContent = result[i];
                             row.appendChild(cell);

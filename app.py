@@ -217,11 +217,6 @@ def get_table_details():
                 elif 41 < i < 55:
                     remaining_cards4.append(remaining_cards_db[0][i])
 
-            print(remaining_cards1)
-            print(remaining_cards2)
-            print(remaining_cards3)
-            print(remaining_cards4)
-
             return jsonify({
                 'last_shuffle_time': last_shuffle_time,
                 'second_last_shuffle_time' : second_last_shuffle_time,
