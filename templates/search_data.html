@@ -216,22 +216,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for i in range(1, 5) %}
+                    {% for i in range(4) %}
                     <tr>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
-                        <td>8</td>
+                        <td>{{ i + 1 }}</td>
+                        {% for j in range(13) %}
+                        <td>{{ remain_card[i * 13 + j] }}</td>
+                        {% endfor %}
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -293,6 +283,7 @@
                     var shuffleTime2 = response.second_last_shuffle_time;
                     var gameResults = response.game_results;
                     var gameResults2 = response.game_results2;
+                    var remaining_cards = response.remaining_cards;
 
                     // 更新模态框数据
                     lastShuffleTime.textContent = shuffleTime;
@@ -337,6 +328,19 @@
                         }
                         modalRow2.appendChild(row);
                     });
+                    var remainTable = document.querySelector("table tbody");
+                    remainTable.innerHTML = "";
+                    for (var i = 0; i < 4; i++) {
+                        var row = document.createElement("tr");
+                        var cellIndex = document.createElement("td");
+                        cellIndex.textContent = i + 1;
+                        row.appendChild(cellIndex);
+                        for (var j = 0; j < 13; j++) {
+                            var cell = document.createElement("td");
+                            cell.textContent = remaining_cards[i * 13 + j];
+                            row.appendChild(cell);
+                        }
+                        remainTable.appendChild(row);
                 }
             };
             xhr.send(JSON.stringify({ table_id: tableId }));
