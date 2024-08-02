@@ -338,12 +338,12 @@
                     remaining_cards1.forEach(function (result) {
                         var row = document.createElement("tr");
                         var cell0 = document.createElement("td");
-                        for (var i = 0; i < result.length; i++) {
+                        for (var i = 1; i < result.length; i++) {
                             var cell = document.createElement("td");
                             cell.textContent = result[i];
                             row.appendChild(cell);
                         }
-                        modalRow.appendChild(row);
+                        RemainRow.appendChild(row);
                     });
                 }
             };
