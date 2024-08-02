@@ -129,7 +129,7 @@ def search_data():
 def get_table_details():
     table_id = request.json.get('table_id')
     print(table_id)
-    if table_id > 0 :
+    if int(table_id) > 0 :
         try:
             conn = db_connect()
             cursor = conn.cursor()
