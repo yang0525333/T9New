@@ -129,114 +129,116 @@ def search_data():
 def get_table_details():
     table_id = request.json.get('table_id')
     print(table_id)
-    try:
-        conn = db_connect()
-        cursor = conn.cursor()
-        cursor.execute('''
-            SELECT event_time
-            FROM (
-                SELECT event_time, 
-                    ROW_NUMBER() OVER (ORDER BY event_time DESC) AS row_num
-                FROM event
-                WHERE table_id = %s AND event_type = 'Shuffle'
-            ) AS subquery
-            WHERE row_num <= 2
-            ORDER BY event_time DESC;
-        ''', (table_id,))
-
-        results = cursor.fetchall()
-        last_shuffle_time = results[0][0] if len(results) > 0 else None
-        second_last_shuffle_time = results[1][0] if len(results) > 1 else None
-        print(last_shuffle_time)
-        if last_shuffle_time:
+    if table_id > 0 :
+        try:
+            conn = db_connect()
+            cursor = conn.cursor()
             cursor.execute('''
-                SELECT 
-                    COUNT(CASE WHEN player_win THEN 1 END) AS player_win_count,
-                    COUNT(CASE WHEN banker_win THEN 1 END) AS banker_win_count,
-                    COUNT(CASE WHEN tie_game THEN 1 END) AS tie_game_count,
-                    COUNT(CASE WHEN any_pair THEN 1 END) AS any_pair_count,
-                    COUNT(CASE WHEN perfect_pair THEN 1 END) AS perfect_pair_count,
-                    COUNT(CASE WHEN lucky_six THEN 1 END) AS lucky_six_count,
-                    COUNT(CASE WHEN player_pair THEN 1 END) AS player_pair_count,
-                    COUNT(CASE WHEN banker_pair THEN 1 END) AS banker_pair_count
-                FROM 
-                    game_result
-                WHERE 
-                    table_id = %s AND game_date BETWEEN %s AND %s
-            ''', (table_id, last_shuffle_time , datetime.now()))
-            game_results = cursor.fetchall()
-        else:
-            game_results = []
-        if second_last_shuffle_time:
+                SELECT event_time
+                FROM (
+                    SELECT event_time, 
+                        ROW_NUMBER() OVER (ORDER BY event_time DESC) AS row_num
+                    FROM event
+                    WHERE table_id = %s AND event_type = 'Shuffle'
+                ) AS subquery
+                WHERE row_num <= 2
+                ORDER BY event_time DESC;
+            ''', (table_id,))
+
+            results = cursor.fetchall()
+            last_shuffle_time = results[0][0] if len(results) > 0 else None
+            second_last_shuffle_time = results[1][0] if len(results) > 1 else None
+            print(last_shuffle_time)
+            if last_shuffle_time:
+                cursor.execute('''
+                    SELECT 
+                        COUNT(CASE WHEN player_win THEN 1 END) AS player_win_count,
+                        COUNT(CASE WHEN banker_win THEN 1 END) AS banker_win_count,
+                        COUNT(CASE WHEN tie_game THEN 1 END) AS tie_game_count,
+                        COUNT(CASE WHEN any_pair THEN 1 END) AS any_pair_count,
+                        COUNT(CASE WHEN perfect_pair THEN 1 END) AS perfect_pair_count,
+                        COUNT(CASE WHEN lucky_six THEN 1 END) AS lucky_six_count,
+                        COUNT(CASE WHEN player_pair THEN 1 END) AS player_pair_count,
+                        COUNT(CASE WHEN banker_pair THEN 1 END) AS banker_pair_count
+                    FROM 
+                        game_result
+                    WHERE 
+                        table_id = %s AND game_date BETWEEN %s AND %s
+                ''', (table_id, last_shuffle_time , datetime.now()))
+                game_results = cursor.fetchall()
+            else:
+                game_results = []
+            if second_last_shuffle_time:
+                cursor.execute('''
+                    SELECT 
+                        COUNT(CASE WHEN player_win THEN 1 END) AS player_win_count,
+                        COUNT(CASE WHEN banker_win THEN 1 END) AS banker_win_count,
+                        COUNT(CASE WHEN tie_game THEN 1 END) AS tie_game_count,
+                        COUNT(CASE WHEN any_pair THEN 1 END) AS any_pair_count,
+                        COUNT(CASE WHEN perfect_pair THEN 1 END) AS perfect_pair_count,
+                        COUNT(CASE WHEN lucky_six THEN 1 END) AS lucky_six_count,
+                        COUNT(CASE WHEN player_pair THEN 1 END) AS player_pair_count,
+                        COUNT(CASE WHEN banker_pair THEN 1 END) AS banker_pair_count
+                    FROM 
+                        game_result
+                    WHERE 
+                        table_id = %s AND game_date BETWEEN %s AND %s
+                ''', (table_id, second_last_shuffle_time , last_shuffle_time))
+                game_results2 = cursor.fetchall()
+            else:
+                game_results = []
+
             cursor.execute('''
-                SELECT 
-                    COUNT(CASE WHEN player_win THEN 1 END) AS player_win_count,
-                    COUNT(CASE WHEN banker_win THEN 1 END) AS banker_win_count,
-                    COUNT(CASE WHEN tie_game THEN 1 END) AS tie_game_count,
-                    COUNT(CASE WHEN any_pair THEN 1 END) AS any_pair_count,
-                    COUNT(CASE WHEN perfect_pair THEN 1 END) AS perfect_pair_count,
-                    COUNT(CASE WHEN lucky_six THEN 1 END) AS lucky_six_count,
-                    COUNT(CASE WHEN player_pair THEN 1 END) AS player_pair_count,
-                    COUNT(CASE WHEN banker_pair THEN 1 END) AS banker_pair_count
-                FROM 
-                    game_result
-                WHERE 
-                    table_id = %s AND game_date BETWEEN %s AND %s
-            ''', (table_id, second_last_shuffle_time , last_shuffle_time))
-            game_results2 = cursor.fetchall()
-        else:
-            game_results = []
+            SELECT *
+            FROM Poker_record
+            WHERE Tableid = %s
+            ORDER BY Shuffle_time DESC
+            LIMIT 1;
+            ''', (table_id,))
+            remaining_cards_db = cursor.fetchall()
+            print(remaining_cards_db)
+            conn.close()
+            if last_shuffle_time:
+                last_shuffle_time = (last_shuffle_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+            if second_last_shuffle_time:
+                second_last_shuffle_time = (second_last_shuffle_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
+            remaining_cards1 = []
+            remaining_cards2 = []
+            remaining_cards3 = []
+            remaining_cards4 = []
+            for i in range(len(remaining_cards_db[0])) :
+                if 2 < i < 16:
+                    remaining_cards1.append(remaining_cards_db[0][i])
+                elif 15 < i < 29:
+                    remaining_cards2.append(remaining_cards_db[0][i])
+                elif 28 < i < 42:
+                    remaining_cards3.append(remaining_cards_db[0][i])
+                elif 41 < i < 55:
+                    remaining_cards4.append(remaining_cards_db[0][i])
 
-        cursor.execute('''
-        SELECT *
-        FROM Poker_record
-        WHERE Tableid = %s
-        ORDER BY Shuffle_time DESC
-        LIMIT 1;
-        ''', (table_id,))
-        remaining_cards_db = cursor.fetchall()
-        print(remaining_cards_db)
-        conn.close()
-        if last_shuffle_time:
-            last_shuffle_time = (last_shuffle_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
-        if second_last_shuffle_time:
-            second_last_shuffle_time = (second_last_shuffle_time + timedelta(hours=8)).strftime('%Y-%m-%d %H:%M:%S')
-        remaining_cards1 = []
-        remaining_cards2 = []
-        remaining_cards3 = []
-        remaining_cards4 = []
-        for i in range(len(remaining_cards_db[0])) :
-            if 2 < i < 16:
-                remaining_cards1.append(remaining_cards_db[0][i])
-            elif 15 < i < 29:
-                remaining_cards2.append(remaining_cards_db[0][i])
-            elif 28 < i < 42:
-                remaining_cards3.append(remaining_cards_db[0][i])
-            elif 41 < i < 55:
-                remaining_cards4.append(remaining_cards_db[0][i])
+            print(remaining_cards1)
+            print(remaining_cards2)
+            print(remaining_cards3)
+            print(remaining_cards4)
 
-        print(remaining_cards1)
-        print(remaining_cards2)
-        print(remaining_cards3)
-        print(remaining_cards4)
+            return jsonify({
+                'last_shuffle_time': last_shuffle_time,
+                'second_last_shuffle_time' : second_last_shuffle_time,
+                'game_results': game_results,
+                'game_results2' : game_results2,
+                'remaining_cards1' : remaining_cards1,
+                'remaining_cards2' : remaining_cards2,
+                'remaining_cards3' : remaining_cards3,
+                "remaining_cards4" : remaining_cards4
+            })
 
-        return jsonify({
-            'last_shuffle_time': last_shuffle_time,
-            'second_last_shuffle_time' : second_last_shuffle_time,
-            'game_results': game_results,
-            'game_results2' : game_results2,
-            'remaining_cards1' : remaining_cards1,
-            'remaining_cards2' : remaining_cards2,
-            'remaining_cards3' : remaining_cards3,
-            "remaining_cards4" : remaining_cards4
-        })
-
-    except psycopg2.Error as e:
-        print(f"Error connecting to PostgreSQL: {e}")
-        return jsonify({'error': 'Error connecting to database.'}), 500
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-        return jsonify({'error': 'An unexpected error occurred.'}), 500
+        except psycopg2.Error as e:
+            print(f"Error connecting to PostgreSQL: {e}")
+            return jsonify({'error': 'Error connecting to database.'}), 500
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+            return jsonify({'error': 'An unexpected error occurred.'}), 500
+    return
     
 @app.route("/new_search", methods=["GET", "POST"])
 def new_search():
