@@ -260,78 +260,72 @@
 
     <script>
         function openModal(tableId) {
-            var modal = document.getElementById("myModal");
-            var modalTitle = document.getElementById("modalTitle");
-            var lastShuffleTime = document.getElementById("lastShuffleTime");
-            var last2ShuffleTime = document.getElementById("last2ShuffleTime");
-            var modalRow = document.getElementById("modalRow");
-            var modalRow2 = document.getElementById("modalRow2");
-            var remainTable = document.getElementById("remainTable");
-    
-            modalTitle.textContent = tableId + "桌 詳細資料";
-            modal.style.display = "block";
-            modalRow.innerHTML = "";
-            modalRow2.innerHTML = "";
-            remainTable.innerHTML = "";
-    
-            // AJAX 请求到后端获取数据
-            var xhr = new XMLHttpRequest();
-            xhr.open("POST", "/get_table_details", true);
-            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    var shuffleTime = response.last_shuffle_time;
-                    var shuffleTime2 = response.second_last_shuffle_time;
-                    var gameResults = response.game_results;
-                    var gameResults2 = response.game_results2;
-                    var remaining_cards = response.remaining_cards;
-                    console.log("剩餘牌數據:", remaining_cards);
-    
-                    // 更新模态框数据
-                    lastShuffleTime.textContent = shuffleTime;
-                    last2ShuffleTime.textContent = shuffleTime2;
-    
-                    gameResults.forEach(function (result) {
-                        var total = result[0] + result[1] + result[2];
-                        var row = document.createElement("tr");
-                        row.innerHTML = `<td>${result[0]} (${total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0}%)</td>
-                                         <td>${result[1]} (${total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0}%)</td>
-                                         <td>${result[2]} (${total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0}%)</td>
-                                         ${result.slice(3).map(val => `<td>${val}</td>`).join('')}`;
-                        modalRow.appendChild(row);
-                    });
-    
-                    gameResults2.forEach(function (result) {
-                        var total = result[0] + result[1] + result[2];
-                        var row = document.createElement("tr");
-                        row.innerHTML = `<td>${result[0]} (${total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0}%)</td>
-                                         <td>${result[1]} (${total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0}%)</td>
-                                         <td>${result[2]} (${total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0}%)</td>
-                                         ${result.slice(3).map(val => `<td>${val}</td>`).join('')}`;
-                        modalRow2.appendChild(row);
-                    });
-    
-                    for (var i = 0; i < 4; i++) {
-                        var row = document.createElement("tr");
-                        row.innerHTML = `<td>${i + 1}</td>
-                                         ${remaining_cards.slice(i * 13, (i + 1) * 13).map(card => `<td>${card || 'N/A'}</td>`).join('')}`;
-                        remainTable.appendChild(row);
-                    }
+        var modal = document.getElementById("myModal");
+        var modalTitle = document.getElementById("modalTitle");
+        var lastShuffleTime = document.getElementById("lastShuffleTime");
+        var last2ShuffleTime = document.getElementById("last2ShuffleTime");
+        var modalRow = document.getElementById("modalRow");
+        var modalRow2 = document.getElementById("modalRow2");
+        var remainTable = document.getElementById("remainTable");
+
+        modalTitle.textContent = tableId + "桌 詳細資料";
+        modal.style.display = "block";
+        modalRow.innerHTML = "";
+        modalRow2.innerHTML = "";
+        remainTable.innerHTML = "";
+
+        // 调试信息
+        console.log("打开模态框，发送 AJAX 请求到 /get_table_details");
+
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "/get_table_details", true);
+        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                var shuffleTime = response.last_shuffle_time;
+                var shuffleTime2 = response.second_last_shuffle_time;
+                var gameResults = response.game_results;
+                var gameResults2 = response.game_results2;
+                var remaining_cards = response.remaining_cards;
+
+                console.log("响应数据:", response);
+
+                lastShuffleTime.textContent = shuffleTime;
+                last2ShuffleTime.textContent = shuffleTime2;
+
+                gameResults.forEach(function (result) {
+                    var total = result[0] + result[1] + result[2];
+                    var row = document.createElement("tr");
+                    row.innerHTML = `<td>${result[0]} (${total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0}%)</td>
+                                    <td>${result[1]} (${total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0}%)</td>
+                                    <td>${result[2]} (${total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0}%)</td>
+                                    ${result.slice(3).map(val => `<td>${val}</td>`).join('')}`;
+                    modalRow.appendChild(row);
+                });
+
+                gameResults2.forEach(function (result) {
+                    var total = result[0] + result[1] + result[2];
+                    var row = document.createElement("tr");
+                    row.innerHTML = `<td>${result[0]} (${total > 0 ? ((result[0] / total) * 100).toFixed(2) : 0}%)</td>
+                                    <td>${result[1]} (${total > 0 ? ((result[1] / total) * 100).toFixed(2) : 0}%)</td>
+                                    <td>${result[2]} (${total > 0 ? ((result[2] / total) * 100).toFixed(2) : 0}%)</td>
+                                    ${result.slice(3).map(val => `<td>${val}</td>`).join('')}`;
+                    modalRow2.appendChild(row);
+                });
+
+                for (var i = 0; i < 4; i++) {
+                    var row = document.createElement("tr");
+                    row.innerHTML = `<td>${i + 1}</td>
+                                    ${remaining_cards.slice(i * 13, (i + 1) * 13).map(card => `<td>${card || 'N/A'}</td>`).join('')}`;
+                    remainTable.appendChild(row);
                 }
-            };
-            xhr.send(JSON.stringify({ table_id: tableId }));
-        }
-    
-        document.getElementsByClassName("close")[0].onclick = function() {
-            document.getElementById("myModal").style.display = "none";
-        }
-    
-        window.onclick = function(event) {
-            var modal = document.getElementById("myModal");
-            if (event.target == modal) {
-                modal.style.display = "none";
+            } else if (xhr.readyState === 4) {
+                console.log("AJAX 请求失败，状态码:", xhr.status);
             }
-        }
+        };
+        xhr.send(JSON.stringify({ table_id: tableId }));
+    }
+
     </script>
     
