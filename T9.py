@@ -429,7 +429,7 @@ async def CheckProbability():
             message = f'近5分鐘內每桌總和後"莊對"家勝率僅剩{round(BankerpairProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
         if TieProbability < 1.5 :
-            message = f'近5分鐘內每桌總和後"和局"勝率僅剩{round(BankerpairProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
+            message = f'近5分鐘內每桌總和後"和局"勝率僅剩{round(TieProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
         conn = await get_db_connection()
         cursor = conn.cursor()
