@@ -434,7 +434,7 @@ async def CheckProbability():
         conn = await get_db_connection()
         cursor = conn.cursor()
         try:
-            cursor.execute('''git
+            cursor.execute('''
                 INSERT INTO history (fetch_time, player, banker ,tie , any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
                 VALUES (%s, %s, %s ,%s ,%s, %s, %s, %s, %s)
             ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability , AnypairProbability , PerfectpairProbability , LuckySixProbability , PlayerpairProbability , BankerpairProbability))
