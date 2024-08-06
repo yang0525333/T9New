@@ -433,11 +433,14 @@ async def CheckProbability():
             await LineNotify(message)
         conn = await get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('''git
-            INSERT INTO history (fetch_time, player, banker ,tie , any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
-            VALUES (%s, %s, %s ,%s ,%s, %s, %s, %s, %s)
-        ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability , AnypairProbability , PerfectpairProbability , LuckySixProbability , PlayerpairProbability , BankerpairProbability))
-        conn.commit()
+        try:
+            cursor.execute('''git
+                INSERT INTO history (fetch_time, player, banker ,tie , any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
+                VALUES (%s, %s, %s ,%s ,%s, %s, %s, %s, %s)
+            ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability , AnypairProbability , PerfectpairProbability , LuckySixProbability , PlayerpairProbability , BankerpairProbability))
+            conn.commit()
+        except: 
+            print("INSERT Probability")
         await release_db_connection(conn)
     except Exception as e:
         print(f"Fetch data error {e}")
