@@ -439,8 +439,8 @@ async def CheckProbability():
                 VALUES (%s, %s, %s ,%s ,%s, %s, %s, %s, %s)
             ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability , AnypairProbability , PerfectpairProbability , LuckySixProbability , PlayerpairProbability , BankerpairProbability))
             conn.commit()
-        except: 
-            print("INSERT Probability")
+        except Exception as e: 
+            print("Fail to INSERT Probability:", e)
         await release_db_connection(conn)
     except Exception as e:
         print(f"Fetch data error {e}")
