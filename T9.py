@@ -422,21 +422,18 @@ async def CheckProbability():
         LuckySixProbability = (TotalLuckySix / TotleGameRound) * 100
         PlayerpairProbability = (TotalPlayerpair / TotleGameRound) * 100
         BankerpairProbability = (TotalBankerpair / TotleGameRound) * 100
-        if PlayerpairProbability < 0 :
+        if PlayerpairProbability == 0 :
             message = f'近5分鐘內每桌總和後"閒對"勝率僅剩{round(PlayerpairProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
-        if BankerpairProbability < 0 :
+        if BankerpairProbability == 0 :
             message = f'近5分鐘內每桌總和後"莊對"家勝率僅剩{round(BankerpairProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
         if TieProbability < 1.5 :
             message = f'近5分鐘內每桌總和後"和局"勝率僅剩{round(TieProbability, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
             await LineNotify(message)
-        if TotalLuckySix < 0 :
-            message = f'近5分鐘內每桌總和後"幸運六"勝率僅剩{round(TotalLuckySix, 2)}% , https://t9live-b5c2cbf5b1b9.herokuapp.com/'
-            await LineNotify(message)
         conn = await get_db_connection()
         cursor = conn.cursor()
-        cursor.execute('''
+        cursor.execute('''git
             INSERT INTO history (fetch_time, player, banker ,tie , any_pair, perfect_pair, lucky_six, player_pair, banker_pair)
             VALUES (%s, %s, %s ,%s ,%s, %s, %s, %s, %s)
         ''', (end_time + timedelta(hours=8) , PlayerProbability , BankerProbability , TieProbability , AnypairProbability , PerfectpairProbability , LuckySixProbability , PlayerpairProbability , BankerpairProbability))
