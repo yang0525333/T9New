@@ -8,7 +8,7 @@ import requests
 
 app = Flask(__name__)
 
-# Database connection details (replace with your own)
+# Database connection details (replace with your own) 123
 DB_NAME = "d5rambgu7d2n92"
 DB_USER = "u75p3bjmps553l"
 DB_PASSWORD = "p9a01ca7070c719e093cf202a51ac3bace95a2869fb77852052b8958e57b7ac16"
