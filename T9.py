@@ -185,7 +185,7 @@ async def EnterTable(websocket):
     global login_data , websocket_connection
     print(login_data)
     try :
-        LoginTable = login_data['Data']['GameList'][0]['TableList'][0]['TableId']
+        LoginTable = login_data['Data']['GameList'][0]['TableId']
         EnterTable_data = {
             "OpCode": "EnterTable",
             "Data": {
