@@ -69,11 +69,12 @@ def calculate_time_range(time_amount, time_unit):
     elif time_unit == 'day':
         end_time = datetime.now()
         start_time = end_time - timedelta(days=int(time_amount))
+    elif time_unit == 'min':
+        end_time = datetime.now()
+        start_time = end_time - timedelta(minutes=int(time_amount))
     else:
         raise ValueError("Invalid time unit")
     return start_time, end_time
-
-@app.route('/', methods=['GET', 'POST'])
 def search_data():
     time_amount = None
     time_unit = None
