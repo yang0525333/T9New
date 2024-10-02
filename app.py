@@ -75,6 +75,8 @@ def calculate_time_range(time_amount, time_unit):
     else:
         raise ValueError("Invalid time unit")
     return start_time, end_time
+
+@app.route('/', methods=['GET', 'POST'])
 def search_data():
     time_amount = None
     time_unit = None
