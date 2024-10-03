@@ -422,10 +422,10 @@ async def CheckProbability():
         LuckySixProbability = (TotalLuckySix / TotleGameRound) * 100
         PlayerpairProbability = (TotalPlayerpair / TotleGameRound) * 100
         BankerpairProbability = (TotalBankerpair / TotleGameRound) * 100
-        if PlayerProbability > 49 :
+        if PlayerProbability < 30 :
             message = f'近1分鐘內每桌總和後"閒家"勝率僅剩{round(PlayerProbability, 2)}%'
             await LineNotify(message)
-        if BankerProbability > 49 : 
+        if BankerProbability < 30 : 
             message = f'近1分鐘內每桌總和後"莊家"勝率僅剩{round(BankerProbability, 2)}%'
             await LineNotify(message)
         conn = await get_db_connection()
